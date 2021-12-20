@@ -1,0 +1,12 @@
+node_modules/
+build/
+dist/
+lib/
+deploy/
+docs/lockup-ui/
+.DS_Store
+*~
+.idea
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
