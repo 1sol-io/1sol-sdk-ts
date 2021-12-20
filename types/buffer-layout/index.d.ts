@@ -14,6 +14,7 @@ declare module 'buffer-layout' {
   // TODO: remove any.
   export class Structure<T = any> extends Layout<T> {
     span: any;
+    offsetOf(property?: string): number;
   }
   export function greedy(
     elementSpan?: number,
@@ -58,7 +59,7 @@ declare module 'buffer-layout' {
     fields: Layout<any>[],
     property?: string,
     decodePrefixes?: boolean,
-  ): Layout<T>;
+  ): Structure<T>;
   export function bits(
     word: Layout<number>,
     msb?: boolean,
