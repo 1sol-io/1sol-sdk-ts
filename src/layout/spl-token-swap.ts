@@ -95,11 +95,15 @@ export class SplTokenSwapInfo {
     return keys;
   }
 
-  public async load(
+  public static async load({
+    connection,
+    address,
+    programId,
+  }: {
     connection: Connection,
     address: PublicKey,
     programId: PublicKey,
-    hostFeeAccount: PublicKey | null
+  }
   ): Promise<SplTokenSwapInfo | null> {
     const info = await connection.getAccountInfo(address);
     if (!info) {

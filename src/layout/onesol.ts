@@ -1,7 +1,7 @@
 import * as Borsh from '@project-serum/borsh'
 import * as BufferLayout from 'buffer-layout';
 import {
-  u64
+  u64,
 } from '@solana/spl-token';
 import {
   PublicKey,

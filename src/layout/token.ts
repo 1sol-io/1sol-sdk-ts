@@ -28,12 +28,7 @@ export type TokenAccountInfo = {
   mint: PublicKey,
   programId: PublicKey,
   owner: PublicKey;
-  amount: u64;
-  delegate: null | PublicKey;
-  delegatedAmount: u64;
-  isInitialized: boolean;
-  isFrozen: boolean;
-  isNative: boolean;
+  amount: u64
 }
 
 export async function getAssociatedTokenAddress(mint: PublicKey, owner: PublicKey): Promise<PublicKey> {
@@ -52,7 +47,7 @@ export async function createAssociateTokenAccount({
   owner: PublicKey,
   payer: PublicKey,
   instructions: TransactionInstruction[],
-}) {
+}): Promise<PublicKey> {
   const tokenAddress = await getAssociatedTokenAddress(mint, owner);
   instructions.push(Token.createAssociatedTokenAccountInstruction(
     ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -62,22 +57,25 @@ export async function createAssociateTokenAccount({
     owner,
     payer
   ));
+
+  return tokenAddress;
 }
 
 export async function createWrappedNativeAccount({
-  connection, owner, payer, amount, instructions, singers
+  connection, owner, payer, amount, instructions, signers
 }: {
   connection: Connection,
   owner: PublicKey,
   payer: PublicKey,
   amount: number,
   instructions: TransactionInstruction[],
-  singers: Signer[],
-}) {
+  signers: Signer[],
+}): Promise<PublicKey> {
   const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(
     connection,
   );
   const newAccount = Keypair.generate();
+
   instructions.push(
     SystemProgram.createAccount({
       fromPubkey: payer,
@@ -87,14 +85,19 @@ export async function createWrappedNativeAccount({
       programId: TOKEN_PROGRAM_ID,
     }),
   );
-  singers.push(newAccount);
-  instructions.push(
-    SystemProgram.transfer({
-      fromPubkey: payer,
-      toPubkey: newAccount.publicKey,
-      lamports: amount,
-    }),
-  );
+
+  signers.push(newAccount);
+
+  if (amount > 0) {
+    instructions.push(
+      SystemProgram.transfer({
+        fromPubkey: payer,
+        toPubkey: newAccount.publicKey,
+        lamports: amount,
+      }),
+    );
+  }
+
   instructions.push(
     Token.createInitAccountInstruction(
       TOKEN_PROGRAM_ID,
@@ -103,4 +106,74 @@ export async function createWrappedNativeAccount({
       owner,
     ),
   );
+
+  return newAccount.publicKey
+}
+
+export async function closeTokenAccount({
+  account,
+  wallet,
+  instructions,
+}: {
+  account: PublicKey,
+  wallet: PublicKey,
+  instructions: TransactionInstruction[],
+}) {
+  instructions.push(Token.createCloseAccountInstruction(
+    TOKEN_PROGRAM_ID,
+    account,
+    wallet,
+    wallet,
+    [],
+  ))
+}
+
+export async function createTokenAccount({
+  connection,
+  owner,
+  payer,
+  mint,
+  amount = 0,
+  instructions,
+  cleanInstructions,
+  signers,
+  cleanSigners,
+}: {
+  connection: Connection,
+  owner: PublicKey,
+  mint: PublicKey,
+  payer: PublicKey,
+  amount?: number,
+  instructions: TransactionInstruction[],
+  signers: Signer[],
+  cleanInstructions: TransactionInstruction[],
+  cleanSigners: Signer[],
+}): Promise<PublicKey> {
+  let account
+
+  if (mint.equals(WRAPPED_SOL_MINT)) {
+    account = await createWrappedNativeAccount({
+      connection,
+      owner,
+      payer,
+      amount,
+      instructions,
+      signers,
+    })
+
+    await closeTokenAccount({
+      account,
+      wallet: owner,
+      instructions: cleanInstructions
+    })
+  } else {
+    account = await createAssociateTokenAccount({
+      mint,
+      owner,
+      payer,
+      instructions,
+    })
+  }
+
+  return account
 }
