@@ -135,8 +135,8 @@ export async function createTokenAccount({
   mint,
   amount = 0,
   instructions,
-  cleanInstructions,
   signers,
+  cleanInstructions,
   cleanSigners,
 }: {
   connection: Connection,
@@ -176,4 +176,61 @@ export async function createTokenAccount({
   }
 
   return account
+}
+
+export async function findOrCreateTokenAccount({
+  connection,
+  owner,
+  payer,
+  mint,
+  amount = 0,
+  instructions,
+  signers,
+  cleanInstructions,
+  cleanSigners,
+}: {
+  connection: Connection,
+  owner: PublicKey,
+  payer: PublicKey,
+  mint: PublicKey,
+  amount?: number,
+  instructions: TransactionInstruction[],
+  signers: Signer[],
+  cleanInstructions: TransactionInstruction[],
+  cleanSigners: Signer[],
+}): Promise<PublicKey> {
+  if (mint.equals(WRAPPED_SOL_MINT)) {
+    const account = await createWrappedNativeAccount({
+      connection,
+      owner,
+      payer,
+      amount,
+      instructions,
+      signers,
+    })
+
+    await closeTokenAccount({
+      account,
+      wallet: owner,
+      instructions: cleanInstructions
+    })
+
+    return account
+  } else {
+    const tokenAddress = await getAssociatedTokenAddress(mint, owner);
+    const tokenAccount = await connection.getAccountInfo(tokenAddress);
+
+    if (tokenAccount) {
+      return tokenAddress
+    }
+
+    const account = await createAssociateTokenAccount({
+      mint,
+      owner,
+      payer,
+      instructions,
+    })
+
+    return account
+  }
 }
