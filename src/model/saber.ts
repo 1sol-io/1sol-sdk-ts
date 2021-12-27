@@ -1,5 +1,5 @@
-import * as Borsh from '@project-serum/borsh'
-import * as BufferLayout from 'buffer-layout';
+import * as Layout from '../layout'
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   u64
 } from '@solana/spl-token';
@@ -30,16 +30,16 @@ import {
 /**
  * Layout for StableSwap fees
  */
-export const FeesLayout = BufferLayout.struct<RawFees>(
+export const FeesLayout = BufferLayout.struct(
   [
-    Borsh.u64("adminTradeFeeNumerator"),
-    Borsh.u64("adminTradeFeeDenominator"),
-    Borsh.u64("adminWithdrawFeeNumerator"),
-    Borsh.u64("adminWithdrawFeeDenominator"),
-    Borsh.u64("tradeFeeNumerator"),
-    Borsh.u64("tradeFeeDenominator"),
-    Borsh.u64("withdrawFeeNumerator"),
-    Borsh.u64("withdrawFeeDenominator"),
+    Layout.u64("adminTradeFeeNumerator"),
+    Layout.u64("adminTradeFeeDenominator"),
+    Layout.u64("adminWithdrawFeeNumerator"),
+    Layout.u64("adminWithdrawFeeDenominator"),
+    Layout.u64("tradeFeeNumerator"),
+    Layout.u64("tradeFeeDenominator"),
+    Layout.u64("withdrawFeeNumerator"),
+    Layout.u64("withdrawFeeDenominator"),
   ],
   "fees"
 );
@@ -47,43 +47,24 @@ export const FeesLayout = BufferLayout.struct<RawFees>(
 /**
  * Layout for stable swap state
  */
- export const StableSwapLayout = BufferLayout.struct<{
-  isInitialized: 0 | 1;
-  isPaused: 0 | 1;
-  nonce: number;
-  initialAmpFactor: u64;
-  targetAmpFactor: u64;
-  startRampTs: number;
-  stopRampTs: number;
-  futureAdminDeadline: number;
-  futureAdminAccount: PublicKey;
-  adminAccount: PublicKey;
-  tokenAccountA: PublicKey;
-  tokenAccountB: PublicKey;
-  tokenPool: PublicKey;
-  mintA: PublicKey;
-  mintB: PublicKey;
-  adminFeeAccountA: PublicKey;
-  adminFeeAccountB: PublicKey;
-  fees: RawFees;
-}>([
+ export const StableSwapLayout = BufferLayout.struct([
   BufferLayout.u8("isInitialized"),
   BufferLayout.u8("isPaused"),
   BufferLayout.u8("nonce"),
-  Borsh.u64("initialAmpFactor"),
-  Borsh.u64("targetAmpFactor"),
+  Layout.u64("initialAmpFactor"),
+  Layout.u64("targetAmpFactor"),
   BufferLayout.ns64("startRampTs"),
   BufferLayout.ns64("stopRampTs"),
   BufferLayout.ns64("futureAdminDeadline"),
-  Borsh.publicKey("futureAdminAccount"),
-  Borsh.publicKey("adminAccount"),
-  Borsh.publicKey("tokenAccountA"),
-  Borsh.publicKey("tokenAccountB"),
-  Borsh.publicKey("tokenPool"),
-  Borsh.publicKey("mintA"),
-  Borsh.publicKey("mintB"),
-  Borsh.publicKey("adminFeeAccountA"),
-  Borsh.publicKey("adminFeeAccountB"),
+  Layout.publicKey("futureAdminAccount"),
+  Layout.publicKey("adminAccount"),
+  Layout.publicKey("tokenAccountA"),
+  Layout.publicKey("tokenAccountB"),
+  Layout.publicKey("tokenPool"),
+  Layout.publicKey("mintA"),
+  Layout.publicKey("mintB"),
+  Layout.publicKey("adminFeeAccountA"),
+  Layout.publicKey("adminFeeAccountB"),
   FeesLayout,
 ]);
 

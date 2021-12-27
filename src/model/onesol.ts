@@ -1,5 +1,5 @@
-import * as Borsh from '@project-serum/borsh'
-import * as BufferLayout from 'buffer-layout';
+import * as Layout from '../layout'
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   u64,
 } from '@solana/spl-token';
@@ -15,18 +15,11 @@ import {
 import bs58 from 'bs58';
 
 // SwapInfo
-export const SwapInfoLayout = BufferLayout.struct<{
-  isInitialized: number,
-  status: number,
-  tokenLatestAmount: BN,
-  owner: PublicKey,
-  tokenAccountOption: number,
-  tokenAccount: Buffer,
-}>([
+export const SwapInfoLayout = BufferLayout.struct([
   BufferLayout.u8("isInitialized"),
   BufferLayout.u8("status"),
-  Borsh.u64("tokenLatestAmount"),
-  Borsh.publicKey("owner"),
+  Layout.u64("tokenLatestAmount"),
+  Layout.publicKey("owner"),
   BufferLayout.u32("tokenAccountOption"),
   BufferLayout.blob(32, "tokenAccount")
 ]);
@@ -64,19 +57,19 @@ export class SwapInfo {
         },
         {
           memcmp: {
-            offset: SwapInfoLayout.offsetOf('isInitialized'),
+            offset: SwapInfoLayout.offsetOf('isInitialized')!,
             bytes: bs58.encode([1]),
           }
         },
         {
           memcmp: {
-            offset: SwapInfoLayout.offsetOf('status'),
+            offset: SwapInfoLayout.offsetOf('status')!,
             bytes: bs58.encode([AccountStatus.SwapInfo]),
           }
         },
         {
           memcmp: {
-            offset: SwapInfoLayout.offsetOf('owner'),
+            offset: SwapInfoLayout.offsetOf('owner')!,
             bytes: owner.toBase58(),
           },
         },

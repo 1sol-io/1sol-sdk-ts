@@ -1,4 +1,4 @@
-import * as BufferLayout from 'buffer-layout';
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   Connection,
   PublicKey,
@@ -8,7 +8,7 @@ import {
   SystemProgram,
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
-import * as Borsh from '@project-serum/borsh';
+import * as Layout from './layout';
 
 import {
   ONESOL_PROTOCOL_PROGRAM_ID,
@@ -34,12 +34,12 @@ import {
   SaberStableSwapInfo,
   RaydiumAmmInfo,
   SerumDexMarketInfo,
-} from './layout'
+} from './model'
 
 import {
   SwapInfo,
   SwapInfoLayout
-} from './layout/onesol'
+} from './model/onesol'
 
 import {
   TokenInfo,
@@ -53,10 +53,10 @@ import {
   createWrappedNativeAccount,
   findOrCreateTokenAccount,
   TokenAccountInfo
-} from "./layout/token";
+} from "./model/token";
 
-export * from './layout/token'
-export * from './layout'
+export * from './model/token'
+export * from './model'
 export * from './const'
 
 interface configProps { }
@@ -1054,9 +1054,9 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1154,7 +1154,7 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1260,8 +1260,8 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1369,9 +1369,9 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1467,7 +1467,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1571,8 +1571,8 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1678,9 +1678,9 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1775,7 +1775,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1878,8 +1878,8 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1974,7 +1974,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -2077,7 +2077,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -2195,9 +2195,9 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
@@ -2295,7 +2295,7 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
@@ -2401,8 +2401,8 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
