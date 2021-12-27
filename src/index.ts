@@ -58,6 +58,7 @@ import {
 export * from './layout/token'
 export * from './layout'
 export * from './const'
+export * from './token-registry'
 
 interface configProps { }
 
@@ -160,10 +161,12 @@ export class OnesolProtocol {
   }
 
   public getFeeTokenAccount(mintAddress: string): PublicKey | null {
-    const feeTokenAccount = this.tokenMap.get(mintAddress)?.feeAccount
+    if (this.tokenMap.get(mintAddress)) {
+      const feeTokenAccount = this.tokenMap.get(mintAddress).feeAccount
 
-    if (feeTokenAccount) {
-      return new PublicKey(feeTokenAccount)
+      if (feeTokenAccount) {
+        return new PublicKey(feeTokenAccount)
+      }
     }
 
     return null

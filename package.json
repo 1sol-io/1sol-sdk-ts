@@ -1,9 +1,9 @@
 {
-  "name": "1sol-sdk-ts",
+  "name": "@1solprotocol/sdk",
   "version": "1.0.0",
   "description": "1sol protocol sdk",
-  "main": "src/index.ts",
-  "types": "types/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "author": "1sol protocol",
   "license": "MIT",
   "scripts": {
