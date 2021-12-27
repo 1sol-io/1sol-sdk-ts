@@ -1,19 +1,38 @@
+// import {
+//   // AccountLayout as TokenAccountLayout,
+//   Token,
+// } from '@solana/spl-token';
 import {
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  AccountLayout as TokenAccountLayout,
-  Token,
-  TOKEN_PROGRAM_ID,
   u64,
-} from '@solana/spl-token';
+} from './index';
 import {
   Connection,
   Keypair,
-  PublicKey, Signer, SystemProgram, TransactionInstruction
+  PublicKey, Signer, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction
 } from '@solana/web3.js';
 import {
   WRAPPED_SOL_MINT,
-} from '../const'
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  TOKEN_PROGRAM_ID,
+} from '../const';
+import * as BufferLayout from '@solana/buffer-layout';
+import * as Layout from '../layout';
 
+
+
+export const TokenAccountLayout = BufferLayout.struct([
+  Layout.publicKey('mint'),
+  Layout.publicKey('owner'),
+  Layout.u64('amount'),
+  BufferLayout.u32('delegateOption'),
+  Layout.publicKey('delegate'),
+  BufferLayout.u8('state'),
+  BufferLayout.u32('isNativeOption'),
+  Layout.u64('isNative'),
+  Layout.u64('delegatedAmount'),
+  BufferLayout.u32('closeAuthorityOption'),
+  Layout.publicKey('closeAuthority'),
+]);
 
 export type TokenMintInfo = {
   mintAuthority: null | PublicKey;
@@ -32,12 +51,15 @@ export type TokenAccountInfo = {
 }
 
 export async function getAssociatedTokenAddress(mint: PublicKey, owner: PublicKey): Promise<PublicKey> {
-  return await Token.getAssociatedTokenAddress(
-    ASSOCIATED_TOKEN_PROGRAM_ID,
-    TOKEN_PROGRAM_ID,
-    mint,
-    owner,
-  )
+  if (!PublicKey.isOnCurve(owner.toBuffer())) {
+    throw new Error(`Owner cannot sign: ${owner.toString()}`);
+  }
+  return (
+    await PublicKey.findProgramAddress(
+      [owner.toBuffer(), TOKEN_PROGRAM_ID.toBuffer(), mint.toBuffer()],
+      ASSOCIATED_TOKEN_PROGRAM_ID,
+    )
+  )[0];
 }
 
 export async function createAssociateTokenAccount({
@@ -49,9 +71,7 @@ export async function createAssociateTokenAccount({
   instructions: TransactionInstruction[],
 }): Promise<PublicKey> {
   const tokenAddress = await getAssociatedTokenAddress(mint, owner);
-  instructions.push(Token.createAssociatedTokenAccountInstruction(
-    ASSOCIATED_TOKEN_PROGRAM_ID,
-    TOKEN_PROGRAM_ID,
+  instructions.push(createAssociatedTokenAccountInstruction(
     mint,
     tokenAddress,
     owner,
@@ -71,8 +91,8 @@ export async function createWrappedNativeAccount({
   instructions: TransactionInstruction[],
   signers: Signer[],
 }): Promise<PublicKey> {
-  const balanceNeeded = await Token.getMinBalanceRentForExemptAccount(
-    connection,
+  const balanceNeeded = await connection.getMinimumBalanceForRentExemption(
+    TokenAccountLayout.span,
   );
   const newAccount = Keypair.generate();
 
@@ -99,8 +119,7 @@ export async function createWrappedNativeAccount({
   }
 
   instructions.push(
-    Token.createInitAccountInstruction(
-      TOKEN_PROGRAM_ID,
+    createInitAccountInstruction(
       WRAPPED_SOL_MINT,
       newAccount.publicKey,
       owner,
@@ -119,13 +138,26 @@ export async function closeTokenAccount({
   wallet: PublicKey,
   instructions: TransactionInstruction[],
 }) {
-  instructions.push(Token.createCloseAccountInstruction(
-    TOKEN_PROGRAM_ID,
-    account,
-    wallet,
-    wallet,
-    [],
-  ))
+  const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')]);
+  const data = Buffer.alloc(dataLayout.span);
+  dataLayout.encode(
+    {
+      instruction: 9, // CloseAccount instruction
+    },
+    data,
+  );
+
+  let keys = [
+    {pubkey: account, isSigner: false, isWritable: true},
+    {pubkey: wallet, isSigner: false, isWritable: true},
+    {pubkey: wallet, isSigner: true, isWritable: false}
+  ];
+
+  return new TransactionInstruction({
+    keys,
+    programId: TOKEN_PROGRAM_ID,
+    data,
+  });
 }
 
 export async function createTokenAccount({
@@ -233,4 +265,56 @@ export async function findOrCreateTokenAccount({
 
     return account
   }
+}
+
+export function createAssociatedTokenAccountInstruction(
+  mint: PublicKey,
+  associatedAccount: PublicKey,
+  owner: PublicKey,
+  payer: PublicKey,
+): TransactionInstruction {
+  const data = Buffer.alloc(0);
+
+  let keys = [
+    { pubkey: payer, isSigner: true, isWritable: true },
+    { pubkey: associatedAccount, isSigner: false, isWritable: true },
+    { pubkey: owner, isSigner: false, isWritable: false },
+    { pubkey: mint, isSigner: false, isWritable: false },
+    { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+    { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+  ];
+
+  return new TransactionInstruction({
+    keys,
+    programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+    data,
+  });
+}
+
+export function createInitAccountInstruction(
+  mint: PublicKey,
+  account: PublicKey,
+  owner: PublicKey,
+): TransactionInstruction {
+  const keys = [
+    {pubkey: account, isSigner: false, isWritable: true},
+    {pubkey: mint, isSigner: false, isWritable: false},
+    {pubkey: owner, isSigner: false, isWritable: false},
+    {pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false},
+  ];
+  const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')]);
+  const data = Buffer.alloc(dataLayout.span);
+  dataLayout.encode(
+    {
+      instruction: 1, // InitializeAccount instruction
+    },
+    data,
+  );
+
+  return new TransactionInstruction({
+    keys,
+    programId: TOKEN_PROGRAM_ID,
+    data,
+  });
 }

@@ -2,7 +2,7 @@ import * as Layout from '../layout'
 import * as BufferLayout from '@solana/buffer-layout';
 import {
   u64
-} from '@solana/spl-token';
+} from './index';
 import BN from 'bn.js';
 import {
   PublicKey,

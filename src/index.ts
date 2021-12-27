@@ -7,7 +7,6 @@ import {
   Keypair,
   SystemProgram,
 } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
 import * as Layout from './layout';
 
 import {
@@ -25,7 +24,8 @@ import {
   EXCHANGER_ORCA_SWAP,
   EXCHANGER_ONEMOON,
   EXCHANGER_SABER_STABLE_SWAP,
-  EXCHANGER_RAYDIUM
+  EXCHANGER_RAYDIUM,
+  TOKEN_PROGRAM_ID,
 } from './const';
 
 import {
@@ -34,6 +34,7 @@ import {
   SaberStableSwapInfo,
   RaydiumAmmInfo,
   SerumDexMarketInfo,
+  u64,
 } from './model'
 
 import {
