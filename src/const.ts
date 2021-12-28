@@ -12,7 +12,7 @@ export const TOKEN_SWAP_PROGRAM_ID = new PublicKey('SwaPpA9LAaLfeLi3a68M4DjnLqgt
 
 export const WRAPPED_SOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
 
-export const CHAIN_ID = 101;
+export const CHAIN_ID = process.env.NODE_ENV === 'development' ? 103 : 101;
 
 export const TOKEN_SWAP_NAME = 'Token Swap'
 export const SERUM_DEX_MARKET_NAME = 'Serum'

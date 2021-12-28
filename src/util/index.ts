@@ -1,7 +1,7 @@
-import { TokenInfo } from './token-registry'
-import { PROVIDER_MAP } from './const';
+import { PROVIDER_MAP } from '../const';
 
-import { Route, RawRoute } from '../types'
+import { TokenInfo } from '../util/token-registry'
+import { Route, RawRoute } from '../../types'
 
 export const queryJsonFiles = async (files: string[]) => {
   const responses = (await Promise.all(
