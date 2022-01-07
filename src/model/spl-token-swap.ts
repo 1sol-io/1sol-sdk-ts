@@ -1,54 +1,31 @@
-import * as Borsh from '@project-serum/borsh'
-import * as BufferLayout from 'buffer-layout';
-import {
-  u64
-} from '@solana/spl-token';
-import BN from 'bn.js';
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   PublicKey,
   AccountMeta,
   Connection,
 } from '@solana/web3.js'
 
-export const SplTokenSwapLayout = BufferLayout.struct<{
-  version: number,
-  isInitialized: number,
-  bumpSeed: number,
-  tokenProgramId: PublicKey,
-  tokenAccountA: PublicKey,
-  tokenAccountB: PublicKey,
-  tokenPool: PublicKey,
-  mintA: PublicKey,
-  mintB: PublicKey,
-  feeAccount: PublicKey,
-  tradeFeeNumerator: BN,
-  tradeFeeDenominator: BN,
-  ownerTradeFeeNumerator: BN,
-  ownerTradeFeeDenominator: BN,
-  ownerWithdrawFeeNumerator: BN,
-  hostFeeNumerator: BN,
-  hostFeeDenominator: BN,
-  curveType: number,
-  curveParameters: Buffer,
-}>([
+import * as Layout from '../layout'
+
+export const SplTokenSwapLayout = BufferLayout.struct([
   BufferLayout.u8('version'),
   BufferLayout.u8('isInitialized'),
   BufferLayout.u8('bumpSeed'),
-  Borsh.publicKey('tokenProgramId'),
-  Borsh.publicKey('tokenAccountA'),
-  Borsh.publicKey('tokenAccountB'),
-  Borsh.publicKey('tokenPool'),
-  Borsh.publicKey('mintA'),
-  Borsh.publicKey('mintB'),
-  Borsh.publicKey('feeAccount'),
-  Borsh.u64('tradeFeeNumerator'),
-  Borsh.u64('tradeFeeDenominator'),
-  Borsh.u64('ownerTradeFeeNumerator'),
-  Borsh.u64('ownerTradeFeeDenominator'),
-  Borsh.u64('ownerWithdrawFeeNumerator'),
-  Borsh.u64('ownerWithdrawFeeDenominator'),
-  Borsh.u64('hostFeeNumerator'),
-  Borsh.u64('hostFeeDenominator'),
+  Layout.publicKey('tokenProgramId'),
+  Layout.publicKey('tokenAccountA'),
+  Layout.publicKey('tokenAccountB'),
+  Layout.publicKey('tokenPool'),
+  Layout.publicKey('mintA'),
+  Layout.publicKey('mintB'),
+  Layout.publicKey('feeAccount'),
+  Layout.u64('tradeFeeNumerator'),
+  Layout.u64('tradeFeeDenominator'),
+  Layout.u64('ownerTradeFeeNumerator'),
+  Layout.u64('ownerTradeFeeDenominator'),
+  Layout.u64('ownerWithdrawFeeNumerator'),
+  Layout.u64('ownerWithdrawFeeDenominator'),
+  Layout.u64('hostFeeNumerator'),
+  Layout.u64('hostFeeDenominator'),
   BufferLayout.u8('curveType'),
   BufferLayout.blob(32, 'curveParameters'),
 ]);

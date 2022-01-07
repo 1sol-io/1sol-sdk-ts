@@ -34,12 +34,12 @@ import {
   SaberStableSwapInfo,
   RaydiumAmmInfo,
   SerumDexMarketInfo,
-} from './program'
+} from './model'
 
 import {
   SwapInfo,
   SwapInfoLayout
-} from './program/onesol'
+} from './model/onesol'
 
 import {
   TokenListContainer
@@ -50,7 +50,7 @@ import {
   createWrappedNativeAccount,
   findOrCreateTokenAccount,
   TokenAccountInfo
-} from "./util/token";
+} from "./model/token";
 
 import { RawDistribution, RawRoute } from '../types'
 import { TokenInfo } from './util/token-registry'

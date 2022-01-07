@@ -1,8 +1,8 @@
-import * as Borsh from '@project-serum/borsh'
-import * as BufferLayout from 'buffer-layout';
+import * as Layout from '../layout'
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   u64
-} from '@solana/spl-token';
+} from './index';
 import {
   PublicKey,
   AccountMeta,
@@ -61,47 +61,47 @@ export function accountFlagsLayout(property = 'accountFlags') {
   return ACCOUNT_FLAGS_LAYOUT.replicate(property);
 }
 
-export const SERUM_MARKET_STATE_LAYOUT_V2 = BufferLayout.struct<any>([
+export const SERUM_MARKET_STATE_LAYOUT_V2 = BufferLayout.struct([
   BufferLayout.blob(5),
   accountFlagsLayout('accountFlags'),
-  Borsh.publicKey('ownAddress'),
-  Borsh.u64('vaultSignerNonce'),
-  Borsh.publicKey('baseMint'),
-  Borsh.publicKey('quoteMint'),
-  Borsh.publicKey('baseVault'),
-  Borsh.u64('baseDepositsTotal'),
-  Borsh.u64('baseFeesAccrued'),
-  Borsh.publicKey('quoteVault'),
-  Borsh.u64('quoteDepositsTotal'),
-  Borsh.u64('quoteFeesAccrued'),
-  Borsh.u64('quoteDustThreshold'),
-  Borsh.publicKey('requestQueue'),
-  Borsh.publicKey('eventQueue'),
-  Borsh.publicKey('bids'),
-  Borsh.publicKey('asks'),
-  Borsh.u64('baseLotSize'),
-  Borsh.u64('quoteLotSize'),
-  Borsh.u64('feeRateBps'),
-  Borsh.u64('referrerRebatesAccrued'),
+  Layout.publicKey('ownAddress'),
+  Layout.u64('vaultSignerNonce'),
+  Layout.publicKey('baseMint'),
+  Layout.publicKey('quoteMint'),
+  Layout.publicKey('baseVault'),
+  Layout.u64('baseDepositsTotal'),
+  Layout.u64('baseFeesAccrued'),
+  Layout.publicKey('quoteVault'),
+  Layout.u64('quoteDepositsTotal'),
+  Layout.u64('quoteFeesAccrued'),
+  Layout.u64('quoteDustThreshold'),
+  Layout.publicKey('requestQueue'),
+  Layout.publicKey('eventQueue'),
+  Layout.publicKey('bids'),
+  Layout.publicKey('asks'),
+  Layout.u64('baseLotSize'),
+  Layout.u64('quoteLotSize'),
+  Layout.u64('feeRateBps'),
+  Layout.u64('referrerRebatesAccrued'),
   BufferLayout.blob(7),
 ]);
 
-export const SERUM_OPEN_ORDERS_LAYOUT_V2 = BufferLayout.struct<any>([
+export const SERUM_OPEN_ORDERS_LAYOUT_V2 = BufferLayout.struct([
   BufferLayout.blob(5),
   accountFlagsLayout('accountFlags'),
-  Borsh.publicKey('market'),
-  Borsh.publicKey('owner'),
+  Layout.publicKey('market'),
+  Layout.publicKey('owner'),
 
   // These are in spl-token (i.e. not lot) units
-  Borsh.u64('baseTokenFree'),
-  Borsh.u64('baseTokenTotal'),
-  Borsh.u64('quoteTokenFree'),
-  Borsh.u64('quoteTokenTotal'),
-  Borsh.u128('freeSlotBits'),
-  Borsh.u128('isBidBits'),
+  Layout.u64('baseTokenFree'),
+  Layout.u64('baseTokenTotal'),
+  Layout.u64('quoteTokenFree'),
+  Layout.u64('quoteTokenTotal'),
+  Layout.u128('freeSlotBits'),
+  Layout.u128('isBidBits'),
   BufferLayout.blob(2048, 'orders'),
   BufferLayout.blob(1024, 'orders'),
-  Borsh.u64('referrerRebatesAccrued'),
+  Layout.u64('referrerRebatesAccrued'),
   BufferLayout.blob(7),
 ]);
 
@@ -247,13 +247,13 @@ export class SerumDexOpenOrders {
     const filters = [
       {
         memcmp: {
-          offset: this.getLayout().offsetOf('market'),
+          offset: this.getLayout().offsetOf('market')!,
           bytes: marketAddress.toBase58(),
         },
       },
       {
         memcmp: {
-          offset: this.getLayout().offsetOf('owner'),
+          offset: this.getLayout().offsetOf('owner')!,
           bytes: ownerAddress.toBase58(),
         },
       },
