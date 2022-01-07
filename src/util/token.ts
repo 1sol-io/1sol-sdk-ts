@@ -14,7 +14,6 @@ import {
   WRAPPED_SOL_MINT,
 } from '../const'
 
-
 export type TokenMintInfo = {
   mintAuthority: null | PublicKey;
   supply: u64;

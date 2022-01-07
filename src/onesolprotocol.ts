@@ -67,7 +67,6 @@ export const SUPPORT_PROGRAM_IDS: string[] = [
   RAYDIUN_V4_PROGRAM_ID.toBase58(),
   ONE_MOON_SWAP_PROGRAM_ID.toBase58()
 ]
-
 export class OnesolProtocol {
   private _openOrdersAccountsCache: {
     [publicKey: string]: { accounts: SerumDexOpenOrders[]; ts: number };
@@ -79,17 +78,19 @@ export class OnesolProtocol {
 
   private tokenMap: Map<string, TokenInfo>;
 
+  public abortController: AbortController;
+
   constructor(
     private connection: Connection,
     private programId: PublicKey = ONESOL_PROTOCOL_PROGRAM_ID,
     private config: configProps = defaultConfig
-
   ) {
     this.connection = connection;
     this.config = config
     this._openOrdersAccountsCache = {};
     this._swapInfoCache = {};
     this.tokenMap = new Map<string, TokenInfo>();
+    this.abortController = new AbortController()
   }
 
   public async getTokenList(): Promise<TokenInfo[]> {
@@ -121,36 +122,35 @@ export class OnesolProtocol {
     sourceMintAddress,
     destinationMintAddress,
     programIds = SUPPORT_PROGRAM_IDS,
+    signal = (new AbortController()).signal
   }: {
     amount: number,
     sourceMintAddress: string,
     destinationMintAddress: string,
-    programIds?: string[]
+    programIds?: string[],
+    signal?: AbortSignal
   }): Promise<RawDistribution[]> {
-    try {
-      const data = {
-        amount_in: amount,
-        source_token_mint_key: sourceMintAddress,
-        destination_token_mint_key: destinationMintAddress,
-        programs: programIds
-      }
-
-      const response = await fetch(`https://api.1sol.io/1/swap/1/${CHAIN_ID}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-
-      const { distributions }: {
-        distributions: RawDistribution[]
-      } = await response.json()
-
-      return distributions
-    } catch {
-      return []
+    const data = {
+      amount_in: amount,
+      source_token_mint_key: sourceMintAddress,
+      destination_token_mint_key: destinationMintAddress,
+      programs: programIds
     }
+
+    const response = await fetch(`https://api.1sol.io/1/swap/1/${CHAIN_ID}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+      signal
+    })
+
+    const { distributions }: {
+      distributions: RawDistribution[]
+    } = await response.json()
+
+    return distributions
   }
 
   public getFeeTokenAccount(mintAddress: string): PublicKey | null {
@@ -597,9 +597,7 @@ export class OnesolProtocol {
 
   public async composeInstructions({
     option,
-    amount,
     walletAddress,
-    feeTokenAccount,
     fromTokenAccount,
     toTokenAccount,
     instructions1,
@@ -611,9 +609,7 @@ export class OnesolProtocol {
     slippage = 0.005,
   }: {
     option: RawDistribution,
-    amount: number,
     walletAddress: PublicKey,
-    feeTokenAccount: PublicKey,
     fromTokenAccount: TokenAccountInfo,
     toTokenAccount: TokenAccountInfo,
     instructions1: TransactionInstruction[],
@@ -634,10 +630,6 @@ export class OnesolProtocol {
 
     const { amount_in, source_token_mint, destination_token_mint } = option
 
-    if (!amount || !amount_in || amount_in !== amount) {
-      throw new Error('amount is required')
-    }
-
     if (!fromTokenAccount || (!fromTokenAccount.mint.equals(WRAPPED_SOL_MINT) && !fromTokenAccount.pubkey)) {
       throw new Error('fromTokenAccount is required')
     }
@@ -649,6 +641,8 @@ export class OnesolProtocol {
     if (toTokenAccount.mint.toBase58() !== destination_token_mint.pubkey) {
       throw new Error('toTokenAccount.mint is different from destination_token_mint')
     }
+
+    const feeTokenAccount = this.getFeeTokenAccount(destination_token_mint.pubkey)
 
     if (!feeTokenAccount) {
       throw new Error('feeTokenAccount is required')

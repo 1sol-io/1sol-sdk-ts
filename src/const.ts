@@ -2,6 +2,7 @@ import {
   PublicKey,
 } from '@solana/web3.js'
 
+export const CHAIN_ID = 101;
 export const ONESOL_PROTOCOL_PROGRAM_ID = new PublicKey('1SoLTvbiicqXZ3MJmnTL2WYXKLYpuxwHpa4yYrVQaMZ');
 export const SERUM_PROGRAM_ID = new PublicKey('9xQeWvG816bUx9EPjHmaT23yvVM2ZWbrrpZb9PusVFin');
 export const SABER_STABLE_SWAP_PROGRAM_ID = new PublicKey('SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ');
@@ -10,9 +11,16 @@ export const RAYDIUN_V4_PROGRAM_ID = new PublicKey('675kPX9MHTjS2zt1qfr1NYHuzeLX
 export const ONE_MOON_SWAP_PROGRAM_ID = new PublicKey('1MooN32fuBBgApc8ujknKJw5sef3BVwPGgz3pto1BAh');
 export const TOKEN_SWAP_PROGRAM_ID = new PublicKey('SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8')
 
-export const WRAPPED_SOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
+// export const CHAIN_ID = 103;
+// export const ONESOL_PROTOCOL_PROGRAM_ID = new PublicKey('9Bj8zgNWT6UaNcXMgzMFrnH5Z13nQ6vFkRNxP743zZyr');
+// export const SERUM_PROGRAM_ID = new PublicKey('DESVgJVGajEgKGXhb6XmqDHGz3VjdgP7rEVESBgxmroY');
+// export const SABER_STABLE_SWAP_PROGRAM_ID = new PublicKey('SSwpkEEcbUqx4vtoEByFjSkhKdCT862DNVb52nZg1UZ');
+// export const ORCA_SWAP_PROGRAM_ID = new PublicKey('554sF8DLPVoUrLyjKqjKzPEksz7VtzurThPjFuVAoge3');
+// export const RAYDIUN_V4_PROGRAM_ID = new PublicKey('675kPX9MHTjS2zt1qfr1NYHuzeLXfQM9H24wFSUt1Mp8');
+// export const ONE_MOON_SWAP_PROGRAM_ID = new PublicKey('1MooN32fuBBgApc8ujknKJw5sef3BVwPGgz3pto1BAh');
+// export const TOKEN_SWAP_PROGRAM_ID = new PublicKey('SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8')
 
-export const CHAIN_ID = process.env.NODE_ENV === 'development' ? 103 : 101;
+export const WRAPPED_SOL_MINT = new PublicKey('So11111111111111111111111111111111111111112');
 
 export const TOKEN_SWAP_NAME = 'Token Swap'
 export const SERUM_DEX_MARKET_NAME = 'Serum'
