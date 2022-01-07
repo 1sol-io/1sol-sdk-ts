@@ -11,9 +11,7 @@
     "build": "tsc"
   },
   "lint-staged": {
-    "packages/*/{src,test}/**/*.ts": [
-      "prettier --write"
-    ]
+    "packages/*/{src,test}/**/*.ts": ["prettier --write"]
   },
   "husky": {
     "hooks": {
@@ -22,7 +20,7 @@
   },
   "prettier": {
     "arrowParens": "avoid",
-    "semi": true,
+    "semi": false,
     "singleQuote": true,
     "trailingComma": "all"
   },

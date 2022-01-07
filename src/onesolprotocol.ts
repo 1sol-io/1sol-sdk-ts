@@ -1,4 +1,4 @@
-import * as BufferLayout from 'buffer-layout';
+import * as BufferLayout from '@solana/buffer-layout';
 import {
   Connection,
   PublicKey,
@@ -7,8 +7,8 @@ import {
   Keypair,
   SystemProgram,
 } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, u64 } from "@solana/spl-token";
-import * as Borsh from '@project-serum/borsh';
+
+import * as Layout from './layout';
 
 import {
   ONESOL_PROTOCOL_PROGRAM_ID,
@@ -25,7 +25,8 @@ import {
   EXCHANGER_ORCA_SWAP,
   EXCHANGER_ONEMOON,
   EXCHANGER_SABER_STABLE_SWAP,
-  EXCHANGER_RAYDIUM
+  EXCHANGER_RAYDIUM,
+  TOKEN_PROGRAM_ID
 } from './const';
 
 import {
@@ -34,6 +35,7 @@ import {
   SaberStableSwapInfo,
   RaydiumAmmInfo,
   SerumDexMarketInfo,
+  u64
 } from './model'
 
 import {
@@ -54,6 +56,9 @@ import {
 
 import { RawDistribution, RawRoute } from '../types'
 import { TokenInfo } from './util/token-registry'
+
+export * from './model/token'
+export * from './model'
 
 export interface configProps { }
 
@@ -78,8 +83,6 @@ export class OnesolProtocol {
 
   private tokenMap: Map<string, TokenInfo>;
 
-  public abortController: AbortController;
-
   constructor(
     private connection: Connection,
     private programId: PublicKey = ONESOL_PROTOCOL_PROGRAM_ID,
@@ -90,7 +93,6 @@ export class OnesolProtocol {
     this._openOrdersAccountsCache = {};
     this._swapInfoCache = {};
     this.tokenMap = new Map<string, TokenInfo>();
-    this.abortController = new AbortController()
   }
 
   public async getTokenList(): Promise<TokenInfo[]> {
@@ -1044,9 +1046,9 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1144,7 +1146,7 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1250,8 +1252,8 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1359,9 +1361,9 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1457,7 +1459,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1561,8 +1563,8 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1668,9 +1670,9 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1765,7 +1767,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -1868,8 +1870,8 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -1964,7 +1966,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
 
     let dataMap: any = {
@@ -2067,7 +2069,7 @@ export class OnesolProtocol {
   }): Promise<TransactionInstruction> {
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
 
     let dataMap: any = {
@@ -2185,9 +2187,9 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("amountIn"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
@@ -2285,7 +2287,7 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("amountIn"),
+      Layout.u64("amountIn"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
@@ -2391,8 +2393,8 @@ export class OnesolProtocol {
 
     const dataLayout = BufferLayout.struct([
       BufferLayout.u8("instruction"),
-      Borsh.u64("expectAmountOut"),
-      Borsh.u64("minimumAmountOut"),
+      Layout.u64("expectAmountOut"),
+      Layout.u64("minimumAmountOut"),
     ]);
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
