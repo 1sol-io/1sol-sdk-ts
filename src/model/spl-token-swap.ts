@@ -1,14 +1,11 @@
-import * as Layout from '../layout'
 import * as BufferLayout from '@solana/buffer-layout';
-import {
-  u64
-} from './index';
-import BN from 'bn.js';
 import {
   PublicKey,
   AccountMeta,
   Connection,
 } from '@solana/web3.js'
+
+import * as Layout from '../layout'
 
 export const SplTokenSwapLayout = BufferLayout.struct([
   BufferLayout.u8('version'),

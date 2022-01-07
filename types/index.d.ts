@@ -1,3 +1,6 @@
+export { TokenInfo, TokenExtensions } from '../util/token-registry'
+export { TokenAccountInfo } from '../util/token'
+
 export interface RawRoute {
   destination_token_mint: {
     decimals: number,
@@ -15,6 +18,7 @@ export interface RawRoute {
 }
 
 export interface RawDistribution {
+  id: string,
   routes: RawRoute[][],
   split_tx: boolean,
   destination_token_mint: {

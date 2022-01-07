@@ -1,9 +1,9 @@
 {
-  "name": "1sol-sdk-ts",
-  "version": "1.0.0",
+  "name": "@onesol/onesol-sdk",
+  "version": "0.1.0",
   "description": "1sol protocol sdk",
-  "main": "src/index.ts",
-  "types": "types/index.d.ts",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "author": "1sol protocol",
   "license": "MIT",
   "scripts": {
@@ -11,9 +11,7 @@
     "build": "tsc"
   },
   "lint-staged": {
-    "packages/*/{src,test}/**/*.ts": [
-      "prettier --write"
-    ]
+    "packages/*/{src,test}/**/*.ts": ["prettier --write"]
   },
   "husky": {
     "hooks": {
@@ -22,7 +20,7 @@
   },
   "prettier": {
     "arrowParens": "avoid",
-    "semi": true,
+    "semi": false,
     "singleQuote": true,
     "trailingComma": "all"
   },
@@ -43,5 +41,16 @@
     "lint-staged": "^12.1.3",
     "prettier": "^2.5.1",
     "typescript": "^4.5.4"
-  }
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/1sol-io/1sol-sdk-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/1sol-io/1sol-sdk-ts/issues"
+  },
+  "homepage": "https://github.com/1sol-io/1sol-sdk-ts#readme"
 }

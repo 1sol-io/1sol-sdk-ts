@@ -29,6 +29,7 @@ export interface TokenInfo {
   readonly feeAccount?: string
 }
 
+
 export class TokenListContainer {
   constructor(private tokenList: TokenInfo[]) { }
 

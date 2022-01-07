@@ -1,18 +1,14 @@
 {
   "compilerOptions": {
+    "incremental": true,
     "target": "es2020",
+    "module": "commonjs",
+    "declaration": true,
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "rootDir": "./src",
-    "forceConsistentCasingInFileNames": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "downlevelIteration": true,
-    "resolveJsonModule": true,
-    "noEmit": true,
+    "outDir": "lib",
     "typeRoots": ["./types/", "./node_modules/@types"],
   },
   "include": ["src"]

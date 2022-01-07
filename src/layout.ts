@@ -1,8 +1,6 @@
 import {
   Layout as LayoutCls,
   blob,
-  u8,
-  u32,
 } from '@solana/buffer-layout';
 import {
   PublicKey

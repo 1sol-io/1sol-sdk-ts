@@ -1,24 +1,19 @@
-// import {
-//   // AccountLayout as TokenAccountLayout,
-//   Token,
-// } from '@solana/spl-token';
-import {
-  u64,
-} from './index';
 import {
   Connection,
   Keypair,
   PublicKey, Signer, SystemProgram, SYSVAR_RENT_PUBKEY, TransactionInstruction
 } from '@solana/web3.js';
+import * as BufferLayout from '@solana/buffer-layout';
+
+import {
+  u64,
+} from './index';
 import {
   WRAPPED_SOL_MINT,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   TOKEN_PROGRAM_ID,
 } from '../const';
-import * as BufferLayout from '@solana/buffer-layout';
 import * as Layout from '../layout';
-
-
 
 export const TokenAccountLayout = BufferLayout.struct([
   Layout.publicKey('mint'),
@@ -148,9 +143,9 @@ export async function closeTokenAccount({
   );
 
   let keys = [
-    {pubkey: account, isSigner: false, isWritable: true},
-    {pubkey: wallet, isSigner: false, isWritable: true},
-    {pubkey: wallet, isSigner: true, isWritable: false}
+    { pubkey: account, isSigner: false, isWritable: true },
+    { pubkey: wallet, isSigner: false, isWritable: true },
+    { pubkey: wallet, isSigner: true, isWritable: false }
   ];
 
   return new TransactionInstruction({
@@ -298,10 +293,10 @@ export function createInitAccountInstruction(
   owner: PublicKey,
 ): TransactionInstruction {
   const keys = [
-    {pubkey: account, isSigner: false, isWritable: true},
-    {pubkey: mint, isSigner: false, isWritable: false},
-    {pubkey: owner, isSigner: false, isWritable: false},
-    {pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false},
+    { pubkey: account, isSigner: false, isWritable: true },
+    { pubkey: mint, isSigner: false, isWritable: false },
+    { pubkey: owner, isSigner: false, isWritable: false },
+    { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
   ];
   const dataLayout = BufferLayout.struct([BufferLayout.u8('instruction')]);
   const data = Buffer.alloc(dataLayout.span);
