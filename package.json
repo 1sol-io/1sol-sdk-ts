@@ -1,5 +1,5 @@
 {
-  "name": "@onesol/sdk",
+  "name": "@onesol/onesol-sdk",
   "version": "0.1.0",
   "description": "1sol protocol sdk",
   "main": "lib/index.js",
@@ -11,9 +11,7 @@
     "build": "tsc"
   },
   "lint-staged": {
-    "packages/*/{src,test}/**/*.ts": [
-      "prettier --write"
-    ]
+    "packages/*/{src,test}/**/*.ts": ["prettier --write"]
   },
   "husky": {
     "hooks": {
