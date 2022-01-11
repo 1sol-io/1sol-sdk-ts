@@ -4,9 +4,11 @@
 
 Onesol SDK is designed to be easier to use.
 
-Getting routes for a given token pair, composing instructions and signers for one route, excuting transactions, and then it's all done.
+> Getting routes for a given token pair, <br/>
+> composing instructions and signers for one route, <br />
+> excuting transactions, <br />
+> and then it's all done.
 
-<br />
 <br />
 
 ## Usage
@@ -146,6 +148,8 @@ await composeInstructions({
 Make transactions and excute swap
 
 With the instructions and signers from last step, transactions can now be signed and sent.
+
+<br />
 
 ## Code in action
 
