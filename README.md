@@ -1,18 +1,27 @@
 # Onesol SDK
 
+[![npm version](https://badge.fury.io/js/@onesol%2Fonesol-sdk.svg)](https://badge.fury.io/js/@onesol%2Fonesol-sdk)
+
 Onesol SDK is designed to be easier to use.
 
 Getting routes for a given token pair, composing instructions and signers for one route, excuting transactions, and then it's all done.
 
-### Usage
+<br />
+<br />
 
-1. Install
+## Usage
+
+### → STEP #0
+
+Install
 
 ```typescript
 yarn add @onesol/onesol-sdk
 ```
 
-2. Load OnesolProtocol instance
+### → STEP #1
+
+Load OnesolProtocol instance
 
 ```typescript
 import {
@@ -25,7 +34,9 @@ const connection = new Connection()
 const onesolProtocol = new OnesolProtocol(connection)
 ```
 
-3. Get supported token list
+### → STEP #2
+
+Get supported token list
 
 ```typescript
 import {
@@ -47,7 +58,9 @@ import {
 const tokenList: TokenInfo[] = await onesolProtocol.getTokenList()
 ```
 
-4. Get routes form a given token pair
+### → STEP #3
+
+Get routes form a given token pair
 
 ```typescript
 import {
@@ -79,7 +92,9 @@ const routes: Route[] = await onesolProtocol.getRoutes({
 })
 ```
 
-5. Compose instructions and signers for transactions
+ ### → STEP #4
+
+Compose instructions and signers for transactions
 
 ```typescript
 import { Signer, TransactionInstruction } from '@solana/web3.js'
@@ -126,11 +141,13 @@ await composeInstructions({
 })
 ```
 
-6. Make transactions and excute swap
+### → STEP #5
+
+Make transactions and excute swap
 
 With the instructions and signers from last step, transactions can now be signed and sent.
 
-### Code in action
+## Code in action
 
 1. [React Hook](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/context/onesolprotocol.tsx)
 2. [Get Routes](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/components/trade/index.tsx#L121-L125)
