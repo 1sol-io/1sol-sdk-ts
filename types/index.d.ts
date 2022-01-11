@@ -45,19 +45,3 @@ export interface Distribution extends RawDistribution {
   },
   offset?: number,
 }
-
-export interface Route {
-  from: string,
-  to: string,
-  in: number,
-  out: number,
-  provider: string,
-  ratio: number
-}
-
-export interface PriceExchange {
-  from: string,
-  to: string,
-  input: number,
-  output: number
-}

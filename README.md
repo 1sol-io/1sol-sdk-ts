@@ -51,10 +51,10 @@ const tokenList: TokenInfo[] = await onesolProtocol.getTokenList()
 
 ```typescript
 import {
-  RawDistribution,
+  Route,
 } from '@onesol/onesol-sdk/types'
 
-// interface RawDistribution {
+// interface Route {
 //   id: string,
 //   routes: RawRoute[][],
 //   split_tx: boolean,
@@ -71,11 +71,11 @@ import {
 //   exchanger_flag: string,
 // }
 
-const routes: RawDistribution[] = await onesolProtocol.getRoutes({
-  amount, // amount of the input token(should be with input token decimail),
-  sourceMintAddress, // mint address of the input token
-  destinationMintAddress, // mint address of the output token
-  signal // [AbortController](https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController) signal, if needed, it can be used to abort the fetch request
+const routes: Route[] = await onesolProtocol.getRoutes({
+  amount: number, // amount of the input token(should be with input token decimail) e.g `10 * 10 ** 6`,
+  sourceMintAddress: string, // mint address of the input token
+  destinationMintAddress: string, // mint address of the output token
+  signal: AbortSignal // [AbortController](https://developer.mozilla.org/zh-CN/docs/Web/API/AbortController) signal, if needed, it can be used to abort the fetch request
 })
 ```
 
@@ -84,7 +84,7 @@ const routes: RawDistribution[] = await onesolProtocol.getRoutes({
 ```typescript
 import { Signer, TransactionInstruction } from '@solana/web3.js'
 import {
-  RawDistribution,
+  Route,
   TokenAccountInfo,
 } from '@onesol/onesol-sdk/types'
 
@@ -108,21 +108,21 @@ const cleanupInstructions: TransactionInstruction[] = [];
 const cleanupSigners: Signer[] = [];
 
 await composeInstructions({
-  route, // `RawDistribution`, one route from the results of the `getRoutes`
-  walletAddress, // wallet public key
+  route: Route, //one route from the results of the `getRoutes`
+  walletAddress: PublicKey, // wallet public key
   fromTokenAccount: {
     pubkey, // public key of input token account
     mint, // public key of input token-mint
     owner, // wallet public key
-  }, // `TokenAccountInfo`, input token account info
-  toTokenAccount, // `TokenAccountInfo`, output token account info
+  }: TokenAccountInfo, // input token account info
+  toTokenAccount: TokenAccountInfo, // output token account info
   setupInstructions,
   setupSigners,
   swapInstructions,
   swapSigners,
   cleanupInstructions,
   cleanupSigners,
-  slippage, // number, default is 0.005
+  slippage: number, //default is 0.005
 })
 ```
 

@@ -8,3 +8,5 @@ export {
   RAYDIUN_V4_PROGRAM_ID,
   ONE_MOON_SWAP_PROGRAM_ID
 } from './const'
+
+export { RawDistribution as Route } from '../types'
