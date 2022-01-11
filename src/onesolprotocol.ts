@@ -598,7 +598,7 @@ export class OnesolProtocol {
   }
 
   public async composeInstructions({
-    option,
+    route,
     walletAddress,
     fromTokenAccount,
     toTokenAccount,
@@ -610,7 +610,7 @@ export class OnesolProtocol {
     cleanupSigners,
     slippage = 0.005,
   }: {
-    option: RawDistribution,
+    route: RawDistribution,
     walletAddress: PublicKey,
     fromTokenAccount: TokenAccountInfo,
     toTokenAccount: TokenAccountInfo,
@@ -622,7 +622,7 @@ export class OnesolProtocol {
     cleanupSigners: Signer[],
     slippage?: number,
   }) {
-    if (!option || !option.routes || !option.routes.length) {
+    if (!route || !route.routes || !route.routes.length) {
       throw new Error('No route found')
     }
 
@@ -630,7 +630,7 @@ export class OnesolProtocol {
       throw new Error('walletAddress is required')
     }
 
-    const { amount_in, source_token_mint, destination_token_mint } = option
+    const { amount_in, source_token_mint, destination_token_mint } = route
 
     if (!fromTokenAccount || (!fromTokenAccount.mint.equals(WRAPPED_SOL_MINT) && !fromTokenAccount.pubkey)) {
       throw new Error('fromTokenAccount is required')
@@ -687,8 +687,8 @@ export class OnesolProtocol {
     })
 
     // direct swap (USDC -> 1SOL)
-    if (option.routes.length === 1) {
-      const [routes] = option.routes
+    if (route.routes.length === 1) {
+      const [routes] = route.routes
 
       const promises = routes.map(
         async (route: RawRoute) =>
@@ -709,8 +709,8 @@ export class OnesolProtocol {
 
       setupInstructions.concat(cleanInstructions)
       setupSigners.concat(cleanSigners)
-    } else if (option.routes.length === 2) {
-      const [routes] = option.routes
+    } else if (route.routes.length === 2) {
+      const [routes] = route.routes
       const [first] = routes
 
       const middleMintKey = new PublicKey(first.destination_token_mint.pubkey)
@@ -734,7 +734,7 @@ export class OnesolProtocol {
 
       await this.composeIndirectSwapInstructions({
         swapInfo,
-        routes: option.routes,
+        routes: route.routes,
         fromAccount: fromAccount!,
         toAccount: toAccount!,
         middleAccount,

@@ -108,7 +108,7 @@ const cleanupInstructions: TransactionInstruction[] = [];
 const cleanupSigners: Signer[] = [];
 
 await composeInstructions({
-  option, // `RawDistribution`, one route from the results of the `getRoutes`
+  route, // `RawDistribution`, one route from the results of the `getRoutes`
   walletAddress, // wallet public key
   fromTokenAccount: {
     pubkey, // public key of input token account
