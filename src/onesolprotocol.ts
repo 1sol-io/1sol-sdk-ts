@@ -602,24 +602,24 @@ export class OnesolProtocol {
     walletAddress,
     fromTokenAccount,
     toTokenAccount,
-    instructions1,
-    instructions2,
-    instructions3,
-    signers1,
-    signers2,
-    signers3,
+    setupInstructions,
+    setupSigners,
+    swapInstructions,
+    swapSigners,
+    cleanupInstructions,
+    cleanupSigners,
     slippage = 0.005,
   }: {
     option: RawDistribution,
     walletAddress: PublicKey,
     fromTokenAccount: TokenAccountInfo,
     toTokenAccount: TokenAccountInfo,
-    instructions1: TransactionInstruction[],
-    instructions2: TransactionInstruction[],
-    instructions3: TransactionInstruction[],
-    signers1: Signer[],
-    signers2: Signer[],
-    signers3: Signer[],
+    setupInstructions: TransactionInstruction[],
+    setupSigners: Signer[],
+    swapInstructions: TransactionInstruction[],
+    swapSigners: Signer[],
+    cleanupInstructions: TransactionInstruction[],
+    cleanupSigners: Signer[],
     slippage?: number,
   }) {
     if (!option || !option.routes || !option.routes.length) {
@@ -664,8 +664,8 @@ export class OnesolProtocol {
         owner: walletAddress,
         payer: walletAddress,
         amount: amount_in,
-        instructions: instructions1,
-        signers: signers1,
+        instructions: setupInstructions,
+        signers: setupSigners,
       })
 
       await closeTokenAccount({
@@ -680,8 +680,8 @@ export class OnesolProtocol {
       owner: walletAddress,
       payer: walletAddress,
       mint: toMintKey,
-      instructions: instructions1,
-      signers: signers1,
+      instructions: setupInstructions,
+      signers: setupSigners,
       cleanInstructions,
       cleanSigners
     })
@@ -699,16 +699,16 @@ export class OnesolProtocol {
             toAccount: toAccount!,
             feeTokenAccount,
             walletAddress,
-            instructions: instructions1,
-            signers: signers1,
+            instructions: setupInstructions,
+            signers: setupSigners,
             route,
             slippage
           }))
 
       await Promise.all(promises)
 
-      instructions1.concat(cleanInstructions)
-      signers1.concat(cleanSigners)
+      setupInstructions.concat(cleanInstructions)
+      setupSigners.concat(cleanSigners)
     } else if (option.routes.length === 2) {
       const [routes] = option.routes
       const [first] = routes
@@ -720,16 +720,16 @@ export class OnesolProtocol {
         owner: walletAddress,
         payer: walletAddress,
         mint: middleMintKey,
-        instructions: instructions1,
-        signers: signers1,
+        instructions: setupInstructions,
+        signers: setupSigners,
         cleanInstructions,
         cleanSigners
       })
 
       const swapInfo = await this.findOrCreateSwapInfo({
         owner: walletAddress,
-        instructions: instructions1,
-        signers: signers1
+        instructions: setupInstructions,
+        signers: setupSigners
       })
 
       await this.composeIndirectSwapInstructions({
@@ -744,14 +744,14 @@ export class OnesolProtocol {
         feeTokenAccount,
         walletAddress,
         slippage,
-        instructions1,
-        signers1,
-        instructions2,
-        signers2,
+        instructions1: setupInstructions,
+        signers1: setupSigners,
+        instructions2: swapInstructions,
+        signers2: swapSigners,
       })
 
-      instructions3.concat(cleanInstructions)
-      signers3.concat(cleanSigners)
+      cleanupInstructions.concat(cleanInstructions)
+      cleanupSigners.concat(cleanSigners)
     }
   }
 
