@@ -153,7 +153,7 @@ With the instructions and signers from last step, transactions can now be signed
 
 ## Code in action
 
-1. [React Hook](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/context/onesolprotocol.tsx)
-2. [Get Routes](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/components/trade/index.tsx#L121-L125)
-3. [Compose instructions and signers](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/components/trade/index.tsx#L280-L309)
-4. [Sign and send transactions](https://github.com/1sol-io/1sol-interface/blob/396b07b696046bea4574373f0f569edf513181b5/src/utils/pools.tsx#L1264-L1364)
+1. [React Hook](https://github.com/1sol-io/1sol-interface/blob/bc7fc25afe789c5c2d0c306f1e30e81bdf27f86e/src/context/onesolprotocol.tsx)
+2. [Get Routes](https://github.com/1sol-io/1sol-interface/blob/bc7fc25afe789c5c2d0c306f1e30e81bdf27f86e/src/components/trade/index.tsx#L143-L147)
+3. [Compose instructions and signers](https://github.com/1sol-io/1sol-interface/blob/bc7fc25afe789c5c2d0c306f1e30e81bdf27f86e/src/components/trade/index.tsx#L302-L329)
+4. [Sign and send transactions](https://github.com/1sol-io/1sol-interface/blob/bc7fc25afe789c5c2d0c306f1e30e81bdf27f86e/src/utils/pools.tsx#L186-L286)
