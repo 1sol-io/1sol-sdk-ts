@@ -1,4 +1,8 @@
-export { configProps, OnesolProtocol } from './onesolprotocol'
+export {
+  OnesolProtocol,
+  RawRoute,
+  RawDistribution as Route
+} from './onesolprotocol'
 
 export {
   TOKEN_SWAP_PROGRAM_ID,
@@ -8,3 +12,6 @@ export {
   RAYDIUN_V4_PROGRAM_ID,
   ONE_MOON_SWAP_PROGRAM_ID
 } from './const'
+
+export { TokenInfo, TokenExtensions } from './util/token-registry'
+export { TokenAccountInfo } from './model/token'

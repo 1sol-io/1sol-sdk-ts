@@ -54,7 +54,6 @@ import {
   TokenAccountInfo
 } from "./model/token";
 
-import { RawDistribution, RawRoute } from '../types'
 import { TokenInfo } from './util/token-registry'
 
 export * from './model/token'
@@ -72,6 +71,40 @@ export const SUPPORT_PROGRAM_IDS: string[] = [
   RAYDIUN_V4_PROGRAM_ID.toBase58(),
   ONE_MOON_SWAP_PROGRAM_ID.toBase58()
 ]
+
+export interface RawRoute {
+  destination_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  source_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  amount_in: number,
+  amount_out: number,
+  exchanger_flag: string,
+  pubkey: string,
+  program_id: string,
+}
+
+export interface RawDistribution {
+  id: string,
+  routes: RawRoute[][],
+  split_tx: boolean,
+  destination_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  source_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  amount_in: number,
+  amount_out: number,
+  exchanger_flag: string,
+}
+
 export class OnesolProtocol {
   private _openOrdersAccountsCache: {
     [publicKey: string]: { accounts: SerumDexOpenOrders[]; ts: number };
@@ -98,6 +131,13 @@ export class OnesolProtocol {
   public async getTokenList(): Promise<TokenInfo[]> {
     const response = await fetch(`https://api.1sol.io/1/token-list?chain_id=${CHAIN_ID}`)
     const tokenJSON = await response.json()
+
+    if (!response.ok) {
+      const error = tokenJSON || response.status
+
+      return Promise.reject(error)
+    }
+
     const tokenList = new TokenListContainer(tokenJSON.tokens);
 
     const list = tokenList.getList();
@@ -147,6 +187,12 @@ export class OnesolProtocol {
       body: JSON.stringify(data),
       signal
     })
+
+    if (!response.ok) {
+      const error = await response.json() || response.status
+
+      return Promise.reject(error)
+    }
 
     const { distributions }: {
       distributions: RawDistribution[]
@@ -598,31 +644,31 @@ export class OnesolProtocol {
   }
 
   public async composeInstructions({
-    option,
+    route,
     walletAddress,
     fromTokenAccount,
     toTokenAccount,
-    instructions1,
-    instructions2,
-    instructions3,
-    signers1,
-    signers2,
-    signers3,
+    setupInstructions,
+    setupSigners,
+    swapInstructions,
+    swapSigners,
+    cleanupInstructions,
+    cleanupSigners,
     slippage = 0.005,
   }: {
-    option: RawDistribution,
+    route: RawDistribution,
     walletAddress: PublicKey,
     fromTokenAccount: TokenAccountInfo,
     toTokenAccount: TokenAccountInfo,
-    instructions1: TransactionInstruction[],
-    instructions2: TransactionInstruction[],
-    instructions3: TransactionInstruction[],
-    signers1: Signer[],
-    signers2: Signer[],
-    signers3: Signer[],
+    setupInstructions: TransactionInstruction[],
+    setupSigners: Signer[],
+    swapInstructions: TransactionInstruction[],
+    swapSigners: Signer[],
+    cleanupInstructions: TransactionInstruction[],
+    cleanupSigners: Signer[],
     slippage?: number,
   }) {
-    if (!option || !option.routes || !option.routes.length) {
+    if (!route || !route.routes || !route.routes.length) {
       throw new Error('No route found')
     }
 
@@ -630,7 +676,7 @@ export class OnesolProtocol {
       throw new Error('walletAddress is required')
     }
 
-    const { amount_in, source_token_mint, destination_token_mint } = option
+    const { amount_in, source_token_mint, destination_token_mint } = route
 
     if (!fromTokenAccount || (!fromTokenAccount.mint.equals(WRAPPED_SOL_MINT) && !fromTokenAccount.pubkey)) {
       throw new Error('fromTokenAccount is required')
@@ -664,8 +710,8 @@ export class OnesolProtocol {
         owner: walletAddress,
         payer: walletAddress,
         amount: amount_in,
-        instructions: instructions1,
-        signers: signers1,
+        instructions: setupInstructions,
+        signers: setupSigners,
       })
 
       await closeTokenAccount({
@@ -680,15 +726,15 @@ export class OnesolProtocol {
       owner: walletAddress,
       payer: walletAddress,
       mint: toMintKey,
-      instructions: instructions1,
-      signers: signers1,
+      instructions: setupInstructions,
+      signers: setupSigners,
       cleanInstructions,
       cleanSigners
     })
 
     // direct swap (USDC -> 1SOL)
-    if (option.routes.length === 1) {
-      const [routes] = option.routes
+    if (route.routes.length === 1) {
+      const [routes] = route.routes
 
       const promises = routes.map(
         async (route: RawRoute) =>
@@ -699,18 +745,18 @@ export class OnesolProtocol {
             toAccount: toAccount!,
             feeTokenAccount,
             walletAddress,
-            instructions: instructions1,
-            signers: signers1,
+            instructions: setupInstructions,
+            signers: setupSigners,
             route,
             slippage
           }))
 
       await Promise.all(promises)
 
-      instructions1.concat(cleanInstructions)
-      signers1.concat(cleanSigners)
-    } else if (option.routes.length === 2) {
-      const [routes] = option.routes
+      setupInstructions.concat(cleanInstructions)
+      setupSigners.concat(cleanSigners)
+    } else if (route.routes.length === 2) {
+      const [routes] = route.routes
       const [first] = routes
 
       const middleMintKey = new PublicKey(first.destination_token_mint.pubkey)
@@ -720,21 +766,21 @@ export class OnesolProtocol {
         owner: walletAddress,
         payer: walletAddress,
         mint: middleMintKey,
-        instructions: instructions1,
-        signers: signers1,
+        instructions: setupInstructions,
+        signers: setupSigners,
         cleanInstructions,
         cleanSigners
       })
 
       const swapInfo = await this.findOrCreateSwapInfo({
         owner: walletAddress,
-        instructions: instructions1,
-        signers: signers1
+        instructions: setupInstructions,
+        signers: setupSigners
       })
 
       await this.composeIndirectSwapInstructions({
         swapInfo,
-        routes: option.routes,
+        routes: route.routes,
         fromAccount: fromAccount!,
         toAccount: toAccount!,
         middleAccount,
@@ -744,14 +790,14 @@ export class OnesolProtocol {
         feeTokenAccount,
         walletAddress,
         slippage,
-        instructions1,
-        signers1,
-        instructions2,
-        signers2,
+        instructions1: setupInstructions,
+        signers1: setupSigners,
+        instructions2: swapInstructions,
+        signers2: swapSigners,
       })
 
-      instructions3.concat(cleanInstructions)
-      signers3.concat(cleanSigners)
+      cleanupInstructions.concat(cleanInstructions)
+      cleanupSigners.concat(cleanSigners)
     }
   }
 
