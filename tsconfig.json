@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "lib",
-    "typeRoots": ["./types/", "./node_modules/@types"],
+    "typeRoots": ["types", "./node_modules/@types"],
   },
-  "include": ["src"]
+  "include": ["src", "types"]
 }

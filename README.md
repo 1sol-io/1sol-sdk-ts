@@ -43,7 +43,7 @@ Get supported token list
 ```typescript
 import {
   TokenInfo
-} from '@onesol/onesol-sdk/types'
+} from '@onesol/onesol-sdk'
 
 // export interface TokenInfo {
 //   readonly chainId: number;
@@ -67,7 +67,7 @@ Get routes form a given token pair
 ```typescript
 import {
   Route,
-} from '@onesol/onesol-sdk/types'
+} from '@onesol/onesol-sdk'
 
 // interface Route {
 //   id: string,
@@ -103,7 +103,7 @@ import { Signer, TransactionInstruction } from '@solana/web3.js'
 import {
   Route,
   TokenAccountInfo,
-} from '@onesol/onesol-sdk/types'
+} from '@onesol/onesol-sdk'
 
 // type TokenAccountInfo = {
 //   pubkey: PublicKey | null,

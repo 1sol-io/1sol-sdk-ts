@@ -54,7 +54,6 @@ import {
   TokenAccountInfo
 } from "./model/token";
 
-import { RawDistribution, RawRoute } from '../types'
 import { TokenInfo } from './util/token-registry'
 
 export * from './model/token'
@@ -72,6 +71,40 @@ export const SUPPORT_PROGRAM_IDS: string[] = [
   RAYDIUN_V4_PROGRAM_ID.toBase58(),
   ONE_MOON_SWAP_PROGRAM_ID.toBase58()
 ]
+
+export interface RawRoute {
+  destination_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  source_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  amount_in: number,
+  amount_out: number,
+  exchanger_flag: string,
+  pubkey: string,
+  program_id: string,
+}
+
+export interface RawDistribution {
+  id: string,
+  routes: RawRoute[][],
+  split_tx: boolean,
+  destination_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  source_token_mint: {
+    decimals: number,
+    pubkey: string
+  },
+  amount_in: number,
+  amount_out: number,
+  exchanger_flag: string,
+}
+
 export class OnesolProtocol {
   private _openOrdersAccountsCache: {
     [publicKey: string]: { accounts: SerumDexOpenOrders[]; ts: number };
@@ -98,6 +131,13 @@ export class OnesolProtocol {
   public async getTokenList(): Promise<TokenInfo[]> {
     const response = await fetch(`https://api.1sol.io/1/token-list?chain_id=${CHAIN_ID}`)
     const tokenJSON = await response.json()
+
+    if (!response.ok) {
+      const error = tokenJSON || response.status
+
+      return Promise.reject(error)
+    }
+
     const tokenList = new TokenListContainer(tokenJSON.tokens);
 
     const list = tokenList.getList();
@@ -147,6 +187,12 @@ export class OnesolProtocol {
       body: JSON.stringify(data),
       signal
     })
+
+    if (!response.ok) {
+      const error = await response.json() || response.status
+
+      return Promise.reject(error)
+    }
 
     const { distributions }: {
       distributions: RawDistribution[]
