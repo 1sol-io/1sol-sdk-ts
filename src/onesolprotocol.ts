@@ -1615,8 +1615,8 @@ export class OnesolProtocol {
 
     let dataMap: any = {
       instruction: 17, // Swap instruction
-      expectAmountOut: expectAmountOut.toBuffer(),
-      minimumAmountOut: minimumAmountOut.toBuffer(),
+      expectAmountOut,
+      minimumAmountOut,
     };
 
     const keys = [
