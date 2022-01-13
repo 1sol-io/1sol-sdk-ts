@@ -686,7 +686,7 @@ export class OnesolProtocol {
       throw new Error('fromTokenAccount.mint is different from source_token_mint')
     }
 
-    if (toTokenAccount.mint.toBase58() !== destination_token_mint.pubkey) {
+    if (toTokenAccount && toTokenAccount.mint && toTokenAccount.mint.toBase58() !== destination_token_mint.pubkey) {
       throw new Error('toTokenAccount.mint is different from destination_token_mint')
     }
 
