@@ -9,6 +9,7 @@ import {
   SYSVAR_RENT_PUBKEY,
   Connection,
   AccountInfo,
+  TransactionInstruction,
 } from '@solana/web3.js'
 import BN from 'bn.js';
 import {
@@ -56,6 +57,7 @@ ACCOUNT_FLAGS_LAYOUT.addBoolean('requestQueue');
 ACCOUNT_FLAGS_LAYOUT.addBoolean('eventQueue');
 ACCOUNT_FLAGS_LAYOUT.addBoolean('bids');
 ACCOUNT_FLAGS_LAYOUT.addBoolean('asks');
+
 
 export function accountFlagsLayout(property = 'accountFlags') {
   return ACCOUNT_FLAGS_LAYOUT.replicate(property);
@@ -296,5 +298,72 @@ export class SerumDexOpenOrders {
       throw new Error('Invalid open orders account');
     }
     return new SerumDexOpenOrders(address, decoded, programId);
+  }
+
+  static initOpenOrdersInstruction(
+    {
+      openOrders, owner, market, programId
+    }:
+    {
+      openOrders: PublicKey,
+      owner: PublicKey,
+      market: PublicKey,
+      programId: PublicKey
+    }
+  ) {
+    const keys = [
+      { pubkey: openOrders, isSigner: false, isWritable: true }, 
+      { pubkey: owner, isSigner: true, isWritable: false}, 
+      { pubkey: market, isSigner: false, isWritable: false}, 
+      { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
+    ];
+    const dataLayout = BufferLayout.struct([
+      BufferLayout.u8("version"),
+      BufferLayout.u32("instruction"),
+    ]);
+    const data = Buffer.alloc(dataLayout.span);
+    dataLayout.encode({
+      version: 0,
+      instruction: new BN(15).toBuffer(),
+    }, data);
+    return new TransactionInstruction({
+      keys,
+      programId: programId,
+      data,
+    })
+  }
+
+  static closeOpenOrdersInstruction(
+    {
+      openOrders, owner, destination, programId, market,
+    }:
+    {
+      openOrders: PublicKey,
+      owner: PublicKey,
+      destination: PublicKey,
+      market: PublicKey,
+      programId: PublicKey
+    }
+  ) {
+    const keys = [
+      { pubkey: openOrders, isSigner: false, isWritable: true }, 
+      { pubkey: owner, isSigner: true, isWritable: false}, 
+      { pubkey: destination, isSigner: false, isWritable: true }, 
+      { pubkey: market, isSigner: false, isWritable: false },
+    ];
+    const dataLayout = BufferLayout.struct([
+      BufferLayout.u8("version"),
+      BufferLayout.u32("instruction"),
+    ]);
+    const data = Buffer.alloc(dataLayout.span);
+    dataLayout.encode({
+      version: 0,
+      instruction: new BN(14).toBuffer(),
+    }, data);
+    return new TransactionInstruction({
+      keys,
+      programId: programId,
+      data,
+    })
   }
 }

@@ -44,7 +44,8 @@ import {
 } from './model/onesol'
 
 import {
-  TokenListContainer
+  TokenListContainer,
+  TokenInfo
 } from './util/token-registry'
 
 import {
@@ -53,8 +54,6 @@ import {
   findOrCreateTokenAccount,
   TokenAccountInfo
 } from "./model/token";
-
-import { TokenInfo } from './util/token-registry'
 
 export * from './model/token'
 export * from './model'
@@ -223,7 +222,9 @@ export class OnesolProtocol {
     instructions,
     signers,
     route,
-    slippage
+    slippage,
+    cleanInstructions,
+    cleanSigners,
   }: {
     fromMintKey: PublicKey,
     toMintKey: PublicKey,
@@ -233,6 +234,8 @@ export class OnesolProtocol {
     walletAddress: PublicKey,
     instructions: TransactionInstruction[],
     signers: Signer[],
+    cleanInstructions: TransactionInstruction[],
+    cleanSigners: Signer[],
     route: RawRoute,
     slippage: number
   }) {
@@ -288,7 +291,9 @@ export class OnesolProtocol {
         owner: walletAddress,
         serumProgramId: SERUM_PROGRAM_ID,
         instructions,
-        signers
+        signers,
+        cleanInstructions,
+        cleanSigners,
       })
 
       if (!openOrders) {
@@ -343,6 +348,8 @@ export class OnesolProtocol {
     signers1,
     instructions2,
     signers2,
+    cleanInstructions,
+    cleanSigners,
   }: {
     swapInfo: PublicKey,
     fromAccount: PublicKey,
@@ -355,6 +362,8 @@ export class OnesolProtocol {
     signers1: Signer[],
     instructions2: TransactionInstruction[],
     signers2: Signer[],
+    cleanInstructions: TransactionInstruction[],
+    cleanSigners: Signer[],
   }): Promise<void> {
     const {
       exchanger_flag,
@@ -403,7 +412,9 @@ export class OnesolProtocol {
         owner: walletAddress,
         serumProgramId: SERUM_PROGRAM_ID,
         instructions: instructions1,
-        signers: signers1
+        signers: signers1,
+        cleanInstructions,
+        cleanSigners,
       })
 
       if (!openOrders) {
@@ -460,6 +471,8 @@ export class OnesolProtocol {
     signers1,
     instructions2,
     signers2,
+    cleanInstructions,
+    cleanSigners,
   }: {
     swapInfo: PublicKey,
     fromAccount: PublicKey,
@@ -474,6 +487,8 @@ export class OnesolProtocol {
     signers1: Signer[],
     instructions2: TransactionInstruction[],
     signers2: Signer[],
+    cleanInstructions: TransactionInstruction[],
+    cleanSigners: Signer[],
   }): Promise<void> {
     const {
       exchanger_flag,
@@ -525,7 +540,9 @@ export class OnesolProtocol {
         owner: walletAddress,
         serumProgramId: SERUM_PROGRAM_ID,
         instructions: instructions1,
-        signers: signers1
+        signers: signers1,
+        cleanInstructions,
+        cleanSigners,
       })
 
       if (!openOrders) {
@@ -584,6 +601,8 @@ export class OnesolProtocol {
     signers1,
     instructions2,
     signers2,
+    cleanInstructions,
+    cleanSigners,
   }: {
     swapInfo: PublicKey,
     routes: RawRoute[][],
@@ -600,6 +619,8 @@ export class OnesolProtocol {
     signers1: Signer[],
     instructions2: TransactionInstruction[],
     signers2: Signer[],
+    cleanInstructions: TransactionInstruction[],
+    cleanSigners: Signer[],
   }) {
     const [routesOne, routesTwo] = routes
     const [one] = routesOne
@@ -624,6 +645,8 @@ export class OnesolProtocol {
       signers1,
       instructions2,
       signers2,
+      cleanInstructions,
+      cleanSigners,
     })
 
     await this.composeSwapOutInstructions({
@@ -640,6 +663,8 @@ export class OnesolProtocol {
       signers1,
       instructions2,
       signers2,
+      cleanInstructions,
+      cleanSigners,
     })
   }
 
@@ -748,7 +773,9 @@ export class OnesolProtocol {
             instructions: setupInstructions,
             signers: setupSigners,
             route,
-            slippage
+            slippage,
+            cleanInstructions,
+            cleanSigners,
           }))
 
       await Promise.all(promises)
@@ -794,6 +821,8 @@ export class OnesolProtocol {
         signers1: setupSigners,
         instructions2: swapInstructions,
         signers2: swapSigners,
+        cleanInstructions,
+        cleanSigners,
       })
 
       cleanupInstructions.concat(cleanInstructions)
@@ -936,7 +965,13 @@ export class OnesolProtocol {
       return this._openOrdersAccountsCache[ownerStr].accounts;
     }
     const layout = SerumDexOpenOrders.getLayout();
-    const openOrdersAccounts = await SerumDexOpenOrders.findForMarketAndOwner(this.connection, market, owner, serumProgramId);
+    const openOrdersAccounts = 
+      await SerumDexOpenOrders.findForMarketAndOwner(
+        this.connection,
+        market,
+        owner,
+        serumProgramId
+      );
     this._openOrdersAccountsCache[ownerStr] = {
       accounts: openOrdersAccounts,
       ts: now,
@@ -945,14 +980,16 @@ export class OnesolProtocol {
   }
 
   async createOpenOrdersAccountInstruction({
-    market, owner, serumProgramId
+    market, owner, serumProgramId, instructions, signers, cleanInstructions, cleanSigners,
   }: {
     market: PublicKey
     owner: PublicKey,
     serumProgramId: PublicKey,
-  },
     instructions: Array<TransactionInstruction>,
-    signers: Array<Signer>
+    signers: Array<Signer>,
+    cleanInstructions: Array<TransactionInstruction>,
+    cleanSigners: Array<Signer>,
+  },
   ): Promise<PublicKey> {
     const openOrdersAccounts = Keypair.generate();
     instructions.push(await OnesolProtocol.makeCreateOpenOrdersAccountInstruction({
@@ -962,13 +999,35 @@ export class OnesolProtocol {
       serumProgramId,
     }));
     signers.push(openOrdersAccounts);
+    instructions.push(await SerumDexOpenOrders.initOpenOrdersInstruction({
+      openOrders: openOrdersAccounts.publicKey,
+      owner: owner,
+      market: market,
+      programId: serumProgramId,
+    }))
     this._openOrdersAccountsCache[`${owner.toBase58()}-${market.toBase58()}`].ts = 0;
+    cleanInstructions.push(
+      await SerumDexOpenOrders.closeOpenOrdersInstruction({
+        openOrders: openOrdersAccounts.publicKey,
+        owner: owner,
+        destination: owner,
+        market,
+        programId: serumProgramId,
+      })
+    )
 
     return openOrdersAccounts.publicKey;
   }
 
   async findOrCreateOpenOrdersAccount({
-    market, owner, serumProgramId = SERUM_PROGRAM_ID, instructions, signers, cacheDurationMs = 86400000
+    market,
+    owner,
+    serumProgramId = SERUM_PROGRAM_ID,
+    instructions,
+    signers,
+    cacheDurationMs = 86400000,
+    cleanInstructions,
+    cleanSigners,
   }: {
     market: PublicKey,
     owner: PublicKey,
@@ -976,6 +1035,8 @@ export class OnesolProtocol {
     cacheDurationMs?: number,
     instructions: Array<TransactionInstruction>,
     signers: Array<Signer>
+    cleanInstructions: Array<TransactionInstruction>,
+    cleanSigners: Array<Signer>
   }): Promise<PublicKey> {
     const openOrders = await this.findOpenOrdersAccountForOwner({
       owner,
@@ -985,8 +1046,14 @@ export class OnesolProtocol {
     });
     if (openOrders.length === 0) {
       const openOrdersAddress = await this.createOpenOrdersAccountInstruction({
-        market, owner, serumProgramId,
-      }, instructions, signers);
+        market,
+        owner,
+        serumProgramId,
+        instructions,
+        signers,
+        cleanInstructions,
+        cleanSigners,
+      });
       return openOrdersAddress;
     } else {
       return openOrders[0].address;
@@ -1004,6 +1071,30 @@ export class OnesolProtocol {
     }
   ) {
     const layout = SerumDexOpenOrders.getLayout();
+    return SystemProgram.createAccount({
+      fromPubkey: owner,
+      newAccountPubkey: newAccountAddress,
+      lamports: await connection.getMinimumBalanceForRentExemption(
+        layout.span,
+      ),
+      space: layout.span,
+      programId: serumProgramId,
+    });
+  }
+
+  static async makeInitOpenOrdersAccountInstruction(
+    {
+      connection, owner, newAccountAddress, serumProgramId = SERUM_PROGRAM_ID
+    }: {
+      connection: Connection,
+      owner: PublicKey,
+      newAccountAddress: PublicKey,
+      serumProgramId?: PublicKey,
+    }
+  ) {
+    const layout = SerumDexOpenOrders.getLayout();
+
+
     return SystemProgram.createAccount({
       fromPubkey: owner,
       newAccountPubkey: newAccountAddress,
