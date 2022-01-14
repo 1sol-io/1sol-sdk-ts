@@ -255,6 +255,12 @@ export class OnesolProtocol {
     route: RawRoute,
     slippage: number
   }) {
+    if (fromMintKey.equals(fromAccount)) {
+      throw new Error("fromAccount === fromMintKey");
+    }
+    if (toMintKey.equals(toAccount)) {
+      throw new Error("toAccount === toMintKey");
+    }
     const {
       exchanger_flag,
       pubkey,
@@ -381,6 +387,12 @@ export class OnesolProtocol {
     cleanInstructions: TransactionInstruction[],
     cleanSigners: Signer[],
   }): Promise<void> {
+    if (fromMintKey.equals(fromAccount)) {
+      throw new Error("fromAccount === fromMintKey");
+    }
+    if (toMintKey.equals(toAccount)) {
+      throw new Error("toAccount === toMintKey");
+    }
     const {
       exchanger_flag,
       pubkey,
@@ -506,6 +518,12 @@ export class OnesolProtocol {
     cleanInstructions: TransactionInstruction[],
     cleanSigners: Signer[],
   }): Promise<void> {
+    if (fromMintKey.equals(fromAccount)) {
+      throw new Error("fromAccount === fromMintKey");
+    }
+    if (toMintKey.equals(toAccount)) {
+      throw new Error("toAccount === toMintKey");
+    }
     const {
       exchanger_flag,
       pubkey,
@@ -669,7 +687,7 @@ export class OnesolProtocol {
       swapInfo,
       fromAccount: middleAccount,
       toAccount,
-      fromMintKey: middleAccount,
+      fromMintKey: middleMintKey,
       toMintKey,
       feeTokenAccount,
       route: two,
