@@ -11,6 +11,8 @@ import {
 import * as Layout from './layout';
 
 import {
+  CHAIN_ID,
+  WRAPPED_SOL_MINT,
   ONESOL_PROTOCOL_PROGRAM_ID,
   SERUM_PROGRAM_ID,
   TOKEN_SWAP_PROGRAM_ID,
@@ -18,14 +20,14 @@ import {
   ORCA_SWAP_PROGRAM_ID,
   RAYDIUN_V4_PROGRAM_ID,
   ONE_MOON_SWAP_PROGRAM_ID,
-  CHAIN_ID,
+  SAROS_SWAP_PROGRAM_ID,
   EXCHANGER_SERUM_DEX,
-  WRAPPED_SOL_MINT,
   EXCHANGER_SPL_TOKEN_SWAP,
   EXCHANGER_ORCA_SWAP,
   EXCHANGER_ONEMOON,
   EXCHANGER_SABER_STABLE_SWAP,
   EXCHANGER_RAYDIUM,
+  EXCHANGER_SAROS_SWAP,
   TOKEN_PROGRAM_ID
 } from './const';
 
@@ -59,9 +61,13 @@ import { TokenInfo } from './util/token-registry'
 export * from './model/token'
 export * from './model'
 
-export interface configProps { }
+export interface ConfigProps {
+  apiBase: string,
+}
 
-export const defaultConfig = {}
+export const defaultConfig = {
+  apiBase: "https://api.1sol.io"
+}
 
 export const SUPPORT_PROGRAM_IDS: string[] = [
   TOKEN_SWAP_PROGRAM_ID.toBase58(),
@@ -69,7 +75,15 @@ export const SUPPORT_PROGRAM_IDS: string[] = [
   SABER_STABLE_SWAP_PROGRAM_ID.toBase58(),
   ORCA_SWAP_PROGRAM_ID.toBase58(),
   RAYDIUN_V4_PROGRAM_ID.toBase58(),
-  ONE_MOON_SWAP_PROGRAM_ID.toBase58()
+  ONE_MOON_SWAP_PROGRAM_ID.toBase58(),
+  SAROS_SWAP_PROGRAM_ID.toBase58(),
+]
+
+const SPL_TOKEN_SWAP_COMPATIBLE = [
+  EXCHANGER_SPL_TOKEN_SWAP,
+  EXCHANGER_ORCA_SWAP,
+  EXCHANGER_ONEMOON,
+  EXCHANGER_SAROS_SWAP, 
 ]
 
 export interface RawRoute {
@@ -115,21 +129,23 @@ export class OnesolProtocol {
   };
 
   private tokenMap: Map<string, TokenInfo>;
+  private apiBase: string = "https://api.1sol.io";
 
   constructor(
     private connection: Connection,
     private programId: PublicKey = ONESOL_PROTOCOL_PROGRAM_ID,
-    private config: configProps = defaultConfig
+    private config: ConfigProps = defaultConfig
   ) {
     this.connection = connection;
     this.config = config
     this._openOrdersAccountsCache = {};
     this._swapInfoCache = {};
+    this.apiBase = config.apiBase;
     this.tokenMap = new Map<string, TokenInfo>();
   }
 
   public async getTokenList(): Promise<TokenInfo[]> {
-    const response = await fetch(`https://api.1sol.io/1/token-list?chain_id=${CHAIN_ID}`)
+    const response = await fetch(new URL(`/1/token-list?chain_id=${CHAIN_ID}`, this.apiBase).href)
     const tokenJSON = await response.json()
 
     if (!response.ok) {
@@ -179,7 +195,7 @@ export class OnesolProtocol {
       programs: programIds
     }
 
-    const response = await fetch(`https://api.1sol.io/1/swap/1/${CHAIN_ID}`, {
+    const response = await fetch(new URL(`/1/swap/1/${CHAIN_ID}`, this.apiBase).href, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -270,7 +286,7 @@ export class OnesolProtocol {
       signers
     }
 
-    if ([EXCHANGER_SPL_TOKEN_SWAP, EXCHANGER_ORCA_SWAP, EXCHANGER_ONEMOON].includes(exchanger_flag)) {
+    if (SPL_TOKEN_SWAP_COMPATIBLE.includes(exchanger_flag)) {
       const splTokenSwapInfo = await SplTokenSwapInfo.load(params)
 
       if (!splTokenSwapInfo) {
@@ -385,7 +401,7 @@ export class OnesolProtocol {
       signers: signers2
     }
 
-    if ([EXCHANGER_SPL_TOKEN_SWAP, EXCHANGER_ORCA_SWAP, EXCHANGER_ONEMOON].includes(exchanger_flag)) {
+    if (SPL_TOKEN_SWAP_COMPATIBLE.includes(exchanger_flag)) {
       const splTokenSwapInfo = await SplTokenSwapInfo.load(params)
 
       if (!splTokenSwapInfo) {
@@ -507,7 +523,7 @@ export class OnesolProtocol {
       signers: signers2
     }
 
-    if ([EXCHANGER_SPL_TOKEN_SWAP, EXCHANGER_ORCA_SWAP, EXCHANGER_ONEMOON].includes(exchanger_flag)) {
+    if (SPL_TOKEN_SWAP_COMPATIBLE.includes(exchanger_flag)) {
       const splTokenSwapInfo = await SplTokenSwapInfo.load(params)
 
       if (!splTokenSwapInfo) {
