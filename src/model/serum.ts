@@ -304,17 +304,17 @@ export class SerumDexOpenOrders {
     {
       openOrders, owner, market, programId
     }:
-    {
-      openOrders: PublicKey,
-      owner: PublicKey,
-      market: PublicKey,
-      programId: PublicKey
-    }
+      {
+        openOrders: PublicKey,
+        owner: PublicKey,
+        market: PublicKey,
+        programId: PublicKey
+      }
   ) {
     const keys = [
-      { pubkey: openOrders, isSigner: false, isWritable: true }, 
-      { pubkey: owner, isSigner: true, isWritable: false}, 
-      { pubkey: market, isSigner: false, isWritable: false}, 
+      { pubkey: openOrders, isSigner: false, isWritable: true },
+      { pubkey: owner, isSigner: true, isWritable: false },
+      { pubkey: market, isSigner: false, isWritable: false },
       { pubkey: SYSVAR_RENT_PUBKEY, isSigner: false, isWritable: false },
     ];
     const dataLayout = BufferLayout.struct([
@@ -324,7 +324,7 @@ export class SerumDexOpenOrders {
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
       version: 0,
-      instruction: new BN(15).toBuffer(),
+      instruction: 15,
     }, data);
     return new TransactionInstruction({
       keys,
@@ -337,18 +337,18 @@ export class SerumDexOpenOrders {
     {
       openOrders, owner, destination, programId, market,
     }:
-    {
-      openOrders: PublicKey,
-      owner: PublicKey,
-      destination: PublicKey,
-      market: PublicKey,
-      programId: PublicKey
-    }
+      {
+        openOrders: PublicKey,
+        owner: PublicKey,
+        destination: PublicKey,
+        market: PublicKey,
+        programId: PublicKey
+      }
   ) {
     const keys = [
-      { pubkey: openOrders, isSigner: false, isWritable: true }, 
-      { pubkey: owner, isSigner: true, isWritable: false}, 
-      { pubkey: destination, isSigner: false, isWritable: true }, 
+      { pubkey: openOrders, isSigner: false, isWritable: true },
+      { pubkey: owner, isSigner: true, isWritable: false },
+      { pubkey: destination, isSigner: false, isWritable: true },
       { pubkey: market, isSigner: false, isWritable: false },
     ];
     const dataLayout = BufferLayout.struct([
@@ -358,7 +358,7 @@ export class SerumDexOpenOrders {
     const data = Buffer.alloc(dataLayout.span);
     dataLayout.encode({
       version: 0,
-      instruction: new BN(14).toBuffer(),
+      instruction: 14,
     }, data);
     return new TransactionInstruction({
       keys,
