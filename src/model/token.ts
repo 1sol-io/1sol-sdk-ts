@@ -148,11 +148,11 @@ export async function closeTokenAccount({
     { pubkey: wallet, isSigner: true, isWritable: false }
   ];
 
-  return new TransactionInstruction({
+  instructions.push(new TransactionInstruction({
     keys,
     programId: TOKEN_PROGRAM_ID,
     data,
-  });
+  }));
 }
 
 export async function createTokenAccount({

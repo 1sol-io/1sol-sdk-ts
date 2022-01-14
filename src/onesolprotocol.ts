@@ -796,8 +796,8 @@ export class OnesolProtocol {
 
       await Promise.all(promises)
 
-      setupInstructions.concat(cleanInstructions)
-      setupSigners.concat(cleanSigners)
+      setupInstructions.push(...cleanInstructions)
+      setupSigners.push(...cleanSigners)
     } else if (route.routes.length === 2) {
       const [routes] = route.routes
       const [first] = routes
@@ -841,8 +841,8 @@ export class OnesolProtocol {
         cleanSigners,
       })
 
-      cleanupInstructions.concat(cleanInstructions)
-      cleanupSigners.concat(cleanSigners)
+      cleanupInstructions.push(...cleanInstructions)
+      cleanupSigners.push(...cleanSigners)
     }
   }
 
@@ -981,7 +981,7 @@ export class OnesolProtocol {
       return this._openOrdersAccountsCache[ownerStr].accounts;
     }
     const layout = SerumDexOpenOrders.getLayout();
-    const openOrdersAccounts = 
+    const openOrdersAccounts =
       await SerumDexOpenOrders.findForMarketAndOwner(
         this.connection,
         market,
