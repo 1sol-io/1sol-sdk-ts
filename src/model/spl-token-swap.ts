@@ -33,6 +33,7 @@ export const SplTokenSwapLayout = BufferLayout.struct([
 export const CurveType = Object.freeze({
   ConstantProduct: 0, // Constant product curve, Uniswap-style
   ConstantPrice: 1, // Constant price curve, always X amount of A token for 1 B token, where X is defined at init
+  Stable: 2, // like uniswap, but with wide zone of 1:1 instead of one point
   Offset: 3, // Offset curve, like Uniswap, but with an additional offset on the token B side
 });
 
