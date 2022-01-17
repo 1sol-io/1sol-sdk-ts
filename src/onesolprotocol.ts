@@ -82,7 +82,7 @@ const SPL_TOKEN_SWAP_COMPATIBLE = [
   EXCHANGER_SPL_TOKEN_SWAP,
   EXCHANGER_ORCA_SWAP,
   EXCHANGER_ONEMOON,
-  EXCHANGER_SAROS_SWAP, 
+  EXCHANGER_SAROS_SWAP,
 ]
 
 export interface RawRoute {
@@ -191,6 +191,7 @@ export class OnesolProtocol {
       amount_in: amount,
       source_token_mint_key: sourceMintAddress,
       destination_token_mint_key: destinationMintAddress,
+      support_experiment: sourceMintAddress === destinationMintAddress,
       programs: programIds
     }
 
