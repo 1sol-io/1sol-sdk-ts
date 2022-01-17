@@ -7,6 +7,7 @@ import {
   Keypair,
   SystemProgram,
 } from "@solana/web3.js";
+import axios from 'axios'
 
 import * as Layout from './layout';
 
@@ -82,7 +83,7 @@ const SPL_TOKEN_SWAP_COMPATIBLE = [
   EXCHANGER_SPL_TOKEN_SWAP,
   EXCHANGER_ORCA_SWAP,
   EXCHANGER_ONEMOON,
-  EXCHANGER_SAROS_SWAP, 
+  EXCHANGER_SAROS_SWAP,
 ]
 
 export interface RawRoute {
@@ -144,16 +145,8 @@ export class OnesolProtocol {
   }
 
   public async getTokenList(): Promise<TokenInfo[]> {
-    const response = await fetch(new URL(`/1/token-list?chain_id=${CHAIN_ID}`, this.apiBase).href)
-    const tokenJSON = await response.json()
-
-    if (!response.ok) {
-      const error = tokenJSON || response.status
-
-      return Promise.reject(error)
-    }
-
-    const tokenList = new TokenListContainer(tokenJSON.tokens);
+    const { data: { tokens } } = await axios.get(new URL(`/1/token-list?chain_id=${CHAIN_ID}`, this.apiBase).href)
+    const tokenList = new TokenListContainer(tokens);
 
     const list = tokenList.getList();
 
@@ -185,33 +178,29 @@ export class OnesolProtocol {
     sourceMintAddress: string,
     destinationMintAddress: string,
     programIds?: string[],
-    signal?: AbortSignal
+    signal: AbortSignal,
   }): Promise<RawDistribution[]> {
     const data = {
       amount_in: amount,
       source_token_mint_key: sourceMintAddress,
       destination_token_mint_key: destinationMintAddress,
-      programs: programIds
+      programs: programIds,
+      support_experiment: sourceMintAddress === destinationMintAddress,
     }
 
-    const response = await fetch(new URL(`/1/swap/1/${CHAIN_ID}`, this.apiBase).href, {
+    const { data: { distributions } }: {
+      data: {
+        distributions: RawDistribution[]
+      }
+    } = await axios({
+      url: new URL(`/1/swap/1/${CHAIN_ID}`, this.apiBase).href,
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      data,
       signal
     })
-
-    if (!response.ok) {
-      const error = await response.json() || response.status
-
-      return Promise.reject(error)
-    }
-
-    const { distributions }: {
-      distributions: RawDistribution[]
-    } = await response.json()
 
     return distributions
   }
