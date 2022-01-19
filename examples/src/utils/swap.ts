@@ -43,8 +43,8 @@ export async function sendSwapTransactions({
     if (swapInstructions.length)
         await sendTransaction(connection, wallet, swapInstructions, swapSigners);
 
-    // if (cleanupInstructions.length)
-    //     await sendTransaction(connection, wallet, cleanupInstructions, cleanupSigners);
+    if (cleanupInstructions.length)
+        await sendTransaction(connection, wallet, cleanupInstructions, cleanupSigners);
 }
 
 export async function findOrCreateTokenAccount({
@@ -158,7 +158,9 @@ export async function composeInstructions({
                     instructions: setupInstructions,
                     signers: setupSigners,
                     route,
-                    slippage
+                    slippage,
+                    cleanInstructions,
+                    cleanSigners,
                 }))
 
         await Promise.all(promises)
@@ -201,6 +203,8 @@ export async function composeInstructions({
             signers1: setupSigners,
             instructions2: swapInstructions,
             signers2: swapSigners,
+            cleanInstructions,
+            cleanSigners,
         })
 
         cleanupInstructions.concat(cleanInstructions)

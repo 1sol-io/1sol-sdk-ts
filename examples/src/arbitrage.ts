@@ -28,6 +28,7 @@ const arbitrage = async () => {
             amount: 100_000000,
             sourceMintAddress: token,
             destinationMintAddress: token,
+            signal: undefined
         });
         const [bestDistribution, ...others] = distributions;
         if (bestDistribution) {
