@@ -37,14 +37,20 @@ export async function sendSwapTransactions({
     cleanupSigners: Signer[]
 }
 ) {
-    if (setupInstructions.length)
+    if (setupInstructions.length) {
+        console.log('setup tx');
         await sendTransaction(connection, wallet, setupInstructions, setupSigners);
+    }
 
-    if (swapInstructions.length)
+    if (swapInstructions.length) {
+        console.log('swap tx');
         await sendTransaction(connection, wallet, swapInstructions, swapSigners);
+    }
 
-    if (cleanupInstructions.length)
+    if (cleanupInstructions.length) {
+        console.log('cleanup tx');
         await sendTransaction(connection, wallet, cleanupInstructions, cleanupSigners);
+    }
 }
 
 export async function findOrCreateTokenAccount({
@@ -82,6 +88,7 @@ export async function composeInstructions({
     route,
     walletAddress,
     fromTokenAccount,
+    midTokenAccount,
     toTokenAccount,
     setupInstructions,
     setupSigners,
@@ -96,6 +103,7 @@ export async function composeInstructions({
     route: RawDistribution,
     walletAddress: PublicKey,
     fromTokenAccount: TokenAccountInfo,
+    midTokenAccount?: TokenAccountInfo,
     toTokenAccount: TokenAccountInfo,
     setupInstructions: TransactionInstruction[],
     setupSigners: Signer[],
@@ -173,7 +181,7 @@ export async function composeInstructions({
 
         const middleMintKey = new PublicKey(first.destination_token_mint.pubkey)
 
-        const middleAccount = await findOrCreateTokenAccount({
+        const middleAccount = midTokenAccount ? midTokenAccount.pubkey : await findOrCreateTokenAccount({
             connection,
             owner: walletAddress,
             payer: walletAddress,
