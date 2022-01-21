@@ -1,6 +1,8 @@
 import { Connection, clusterApiUrl, Signer, TransactionInstruction, PublicKey, Keypair } from '@solana/web3.js'
 import { OnesolProtocol } from "@onesol/onesol-sdk"
 import { composeInstructions, sendSwapTransactions } from './utils/swap';
+import tokenAccountCache from './tokenAccountCache.json'
+import privatekey from './privatekey.json'
 
 const connection = new Connection(
     "https://solana-api.projectserum.com",
@@ -8,7 +10,7 @@ const connection = new Connection(
 );
 
 const onesol = new OnesolProtocol(connection);
-const secretKey = Uint8Array.from([]);
+const secretKey = Uint8Array.from(privatekey);
 const wallet = Keypair.fromSecretKey(secretKey);
 
 const arbitrage = async () => {
@@ -16,37 +18,11 @@ const arbitrage = async () => {
 
     /// USDC
     const token = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    const tokenAccount = undefined;
-
-    const whiteTokenMap = {
-        /// WSOL
-        "So11111111111111111111111111111111111111112": undefined,
-        /// ETH
-        "7vfCXTUXx5WJV5JADk17DUJ4ksgau7utNKj4b963voxs": undefined,
-        /// WBTC
-        "9n4nbM75f5Ui33ZbPYXn59EwSgE8CGsHtAeTH5YFeJ9E": undefined,
-        /// BASIS
-        "Basis9oJw9j8cw53oMV7iqsgo6ihi9ALw4QR31rcjUJa": undefined,
-        /// RAY
-        "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R": undefined,
-        /// ORCA
-        "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE": undefined,
-        /// mSOL
-        "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So": undefined,
-        /// SRM
-        "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt": undefined,
-        /// BNB
-        "9gP2kCy3wA1ctvYWQk75guqXuHfrEomqydHLtcTCqiLa": undefined,
-        /// LINK
-        "2wpTofQ8SkACrkZWrZDjXPitYa8AwWgX8AfxdeBRRVLX": undefined,
-        /// SLND
-        "SLNDpmoWTVADgEdndyvWzroNL7zSi1dF9PC3xHGtPwp": undefined,
-    }
-    const whiteList = Object.keys(whiteTokenMap);
+    const tokenAccount = tokenAccountCache[token];
 
     const minDeltaAmount = 1_00000;
-    const maxDeltaAmount = 10_000000;
-    const slippage = 0.001;
+    const maxDeltaAmount = 12_000000;
+    const slippage = 0.002;
 
     while (true) {
         const distributions = await onesol.getRoutes({
@@ -57,76 +33,74 @@ const arbitrage = async () => {
         });
         const [bestDistribution, ...others] = distributions;
         if (bestDistribution) {
-            /// keep mid token mint in white list.
-            const midTokenMint = bestDistribution.routes[0][0].destination_token_mint.pubkey;
-            if (whiteList.includes(midTokenMint)) {
-                /// keep amount_out - amount_in in [minDeltaAmount, maxDeltaAmount]
-                if (
-                    bestDistribution.amount_out > bestDistribution.amount_in &&
-                    bestDistribution.amount_out - bestDistribution.amount_in <= maxDeltaAmount &&
-                    bestDistribution.amount_out - bestDistribution.amount_in >= minDeltaAmount
-                ) {
-                    const midTokenAccount = whiteTokenMap[midTokenMint];
+            console.log(`${bestDistribution.amount_in} => ${bestDistribution.amount_out}`, bestDistribution);
+            /// keep amount_out - amount_in in [minDeltaAmount, maxDeltaAmount]
+            if (
+                bestDistribution.amount_out > bestDistribution.amount_in &&
+                bestDistribution.amount_out - bestDistribution.amount_in <= maxDeltaAmount &&
+                bestDistribution.amount_out - bestDistribution.amount_in >= minDeltaAmount
+            ) {
+                /// keep mid token mint in white list.
+                const midTokenMint = bestDistribution.routes[0][0].destination_token_mint.pubkey;
 
-                    console.log('✅ Find arbitrage', `${bestDistribution.amount_in} USDC => ${bestDistribution.amount_out} USDC`, bestDistribution);
+                const midTokenAccount = tokenAccountCache[midTokenMint];
 
-                    const setupInstructions: TransactionInstruction[] = [];
-                    const setupSigners: Signer[] = [];
-                    const swapInstructions: TransactionInstruction[] = [];
-                    const swapSigners: Signer[] = [];
-                    const cleanupInstructions: TransactionInstruction[] = [];
-                    const cleanupSigners: Signer[] = [];
+                console.log('✅ Find arbitrage', `${bestDistribution.amount_in} USDC => ${bestDistribution.amount_out} USDC`);
 
-                    await composeInstructions({
-                        onesol,
-                        connection,
-                        route: bestDistribution,
-                        walletAddress: wallet.publicKey,
-                        fromTokenAccount: {
-                            pubkey: new PublicKey(tokenAccount),
-                            mint: new PublicKey(bestDistribution.source_token_mint.pubkey),
-                            owner: undefined,
-                            programId: undefined,
-                            amount: undefined,
-                        },
-                        midTokenAccount: midTokenAccount ? {
-                            pubkey: new PublicKey(midTokenAccount),
-                            mint: new PublicKey(midTokenMint),
-                            owner: undefined,
-                            programId: undefined,
-                            amount: undefined,
-                        } : undefined,
-                        toTokenAccount: {
-                            pubkey: new PublicKey(tokenAccount),
-                            mint: new PublicKey(bestDistribution.destination_token_mint.pubkey),
-                            owner: undefined,
-                            programId: undefined,
-                            amount: undefined,
-                        },
-                        setupInstructions,
-                        setupSigners,
-                        swapInstructions,
-                        swapSigners,
-                        cleanupInstructions,
-                        cleanupSigners,
-                        slippage
-                    })
+                const setupInstructions: TransactionInstruction[] = [];
+                const setupSigners: Signer[] = [];
+                const swapInstructions: TransactionInstruction[] = [];
+                const swapSigners: Signer[] = [];
+                const cleanupInstructions: TransactionInstruction[] = [];
+                const cleanupSigners: Signer[] = [];
 
-                    await sendSwapTransactions({
-                        connection,
-                        wallet,
-                        setupInstructions,
-                        swapInstructions,
-                        cleanupInstructions,
-                        setupSigners,
-                        swapSigners,
-                        cleanupSigners,
-                    })
-                } else {
-                    console.log(`Unable to find arbitrage ${bestDistribution.amount_in} => ${bestDistribution.amount_out}`);
-                }
-            } else {
-                console.log(midTokenMint, 'not in white list.')
+                await composeInstructions({
+                    onesol,
+                    connection,
+                    route: bestDistribution,
+                    walletAddress: wallet.publicKey,
+                    fromTokenAccount: {
+                        pubkey: new PublicKey(tokenAccount),
+                        mint: new PublicKey(bestDistribution.source_token_mint.pubkey),
+                        owner: undefined,
+                        programId: undefined,
+                        amount: undefined,
+                    },
+                    midTokenAccount: midTokenAccount ? {
+                        pubkey: new PublicKey(midTokenAccount),
+                        mint: new PublicKey(midTokenMint),
+                        owner: undefined,
+                        programId: undefined,
+                        amount: undefined,
+                    } : undefined,
+                    toTokenAccount: {
+                        pubkey: new PublicKey(tokenAccount),
+                        mint: new PublicKey(bestDistribution.destination_token_mint.pubkey),
+                        owner: undefined,
+                        programId: undefined,
+                        amount: undefined,
+                    },
+                    setupInstructions,
+                    setupSigners,
+                    swapInstructions,
+                    swapSigners,
+                    cleanupInstructions,
+                    cleanupSigners,
+                    slippage
+                })
+
+                console.log(setupInstructions, swapInstructions, cleanupInstructions);
+
+                await sendSwapTransactions({
+                    connection,
+                    wallet,
+                    setupInstructions,
+                    swapInstructions,
+                    cleanupInstructions,
+                    setupSigners,
+                    swapSigners,
+                    cleanupSigners,
+                })
             }
         } else {
             console.log('Unable to find best distribution');
