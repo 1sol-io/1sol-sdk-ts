@@ -467,7 +467,7 @@ export class OnesolProtocol {
         throw new Error(`RaydiumAmmInfo not found`)
       }
 
-      await this.createSwapInByRaydiumSwapInstruction({
+      await this.createSwapInByRaydiumSwap2Instruction({
         ...data,
         raydiumInfo,
       })
@@ -601,7 +601,7 @@ export class OnesolProtocol {
         throw new Error(`RaydiumAmmInfo not found`)
       }
 
-      await this.createSwapOutByRaydiumSwapInstruction({
+      await this.createSwapOutByRaydiumSwap2Instruction({
         ...data,
         raydiumInfo,
       })
@@ -1846,205 +1846,6 @@ export class OnesolProtocol {
       { pubkey: sourceTokenKey, isSigner: false, isWritable: true },
       { pubkey: destinationTokenKey, isSigner: false, isWritable: true },
       { pubkey: wallet, isSigner: true, isWritable: false },
-      { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-      { pubkey: feeTokenAccount, isSigner: false, isWritable: true },
-      ...raydiumInfo.toKeys(),
-    ];
-
-    const data = Buffer.alloc(dataLayout.span);
-    dataLayout.encode(dataMap, data);
-
-    return new TransactionInstruction({
-      keys,
-      programId: programId,
-      data,
-    });
-  }
-
-  async createSwapInByRaydiumSwapInstruction(
-    {
-      fromTokenAccountKey,
-      toTokenAccountKey,
-      fromMintKey,
-      toMintKey,
-      wallet,
-      swapInfo,
-      amountIn,
-      raydiumInfo,
-      instructions,
-      signers,
-    }: {
-      fromTokenAccountKey: PublicKey;
-      toTokenAccountKey: PublicKey;
-      fromMintKey: PublicKey;
-      toMintKey: PublicKey;
-      wallet: PublicKey;
-      swapInfo: PublicKey;
-      amountIn: u64;
-      raydiumInfo: RaydiumAmmInfo;
-      instructions: TransactionInstruction[],
-      signers: Signer[],
-    },
-  ): Promise<void> {
-    instructions.push(
-      await OnesolProtocol.makeSwapInByRaydiumSwapInstruction({
-        sourceTokenKey: fromTokenAccountKey,
-        sourceMint: fromMintKey,
-        destinationTokenKey: toTokenAccountKey,
-        destinationMint: toMintKey,
-        wallet: wallet,
-        tokenProgramId: TOKEN_PROGRAM_ID,
-        swapInfo: swapInfo,
-        raydiumInfo: raydiumInfo,
-        amountIn: amountIn,
-        programId: this.programId,
-      })
-    );
-  }
-
-  static async makeSwapInByRaydiumSwapInstruction({
-    sourceTokenKey,
-    sourceMint,
-    destinationTokenKey,
-    destinationMint,
-    wallet,
-    swapInfo,
-    tokenProgramId = TOKEN_PROGRAM_ID,
-    raydiumInfo,
-    amountIn,
-    programId = ONESOL_PROTOCOL_PROGRAM_ID,
-  }: {
-    sourceTokenKey: PublicKey;
-    sourceMint: PublicKey;
-    destinationTokenKey: PublicKey;
-    destinationMint: PublicKey;
-    wallet: PublicKey;
-    tokenProgramId?: PublicKey;
-    swapInfo: PublicKey;
-    raydiumInfo: RaydiumAmmInfo;
-    amountIn: u64;
-    programId?: PublicKey,
-  }): Promise<TransactionInstruction> {
-    const dataLayout = BufferLayout.struct([
-      BufferLayout.u8("instruction"),
-      Layout.u64("amountIn"),
-    ]);
-
-    let dataMap: any = {
-      instruction: 18,
-      amountIn: amountIn,
-    };
-
-    const keys = [
-      { pubkey: sourceTokenKey, isSigner: false, isWritable: true },
-      { pubkey: destinationTokenKey, isSigner: false, isWritable: true },
-      { pubkey: wallet, isSigner: true, isWritable: false },
-      { pubkey: swapInfo, isSigner: false, isWritable: true },
-      { pubkey: tokenProgramId, isSigner: false, isWritable: false },
-      ...raydiumInfo.toKeys(),
-    ];
-
-    const data = Buffer.alloc(dataLayout.span);
-    dataLayout.encode(dataMap, data);
-
-    return new TransactionInstruction({
-      keys,
-      programId: programId,
-      data,
-    });
-  }
-
-  async createSwapOutByRaydiumSwapInstruction(
-    {
-      fromTokenAccountKey,
-      toTokenAccountKey,
-      fromMintKey,
-      toMintKey,
-      wallet,
-      feeTokenAccount,
-      swapInfo,
-      expectAmountOut,
-      minimumAmountOut,
-      raydiumInfo,
-      instructions,
-      signers,
-    }: {
-      fromTokenAccountKey: PublicKey;
-      toTokenAccountKey: PublicKey;
-      fromMintKey: PublicKey;
-      toMintKey: PublicKey;
-      wallet: PublicKey;
-      feeTokenAccount: PublicKey;
-      swapInfo: PublicKey;
-      expectAmountOut: u64;
-      minimumAmountOut: u64;
-      raydiumInfo: RaydiumAmmInfo;
-      instructions: TransactionInstruction[],
-      signers: Signer[],
-    },
-  ): Promise<void> {
-    instructions.push(
-      await OnesolProtocol.makeSwapOutByRaydiumSwapInstruction({
-        sourceTokenKey: fromTokenAccountKey,
-        sourceMint: fromMintKey,
-        destinationTokenKey: toTokenAccountKey,
-        destinationMint: toMintKey,
-        wallet: wallet,
-        tokenProgramId: TOKEN_PROGRAM_ID,
-        feeTokenAccount: feeTokenAccount,
-        swapInfo: swapInfo,
-        raydiumInfo: raydiumInfo,
-        expectAmountOut: expectAmountOut,
-        minimumAmountOut: minimumAmountOut,
-        programId: this.programId,
-      })
-    );
-  }
-
-  static async makeSwapOutByRaydiumSwapInstruction({
-    sourceTokenKey,
-    sourceMint,
-    destinationTokenKey,
-    destinationMint,
-    wallet,
-    tokenProgramId = TOKEN_PROGRAM_ID,
-    feeTokenAccount,
-    swapInfo,
-    raydiumInfo,
-    expectAmountOut,
-    minimumAmountOut,
-    programId = ONESOL_PROTOCOL_PROGRAM_ID,
-  }: {
-    sourceTokenKey: PublicKey;
-    sourceMint: PublicKey;
-    destinationTokenKey: PublicKey;
-    destinationMint: PublicKey;
-    wallet: PublicKey;
-    tokenProgramId?: PublicKey;
-    feeTokenAccount: PublicKey;
-    swapInfo: PublicKey;
-    raydiumInfo: RaydiumAmmInfo;
-    expectAmountOut: u64;
-    minimumAmountOut: u64;
-    programId?: PublicKey,
-  }): Promise<TransactionInstruction> {
-    const dataLayout = BufferLayout.struct([
-      BufferLayout.u8("instruction"),
-      Layout.u64("expectAmountOut"),
-      Layout.u64("minimumAmountOut"),
-    ]);
-
-    let dataMap: any = {
-      instruction: 19,
-      expectAmountOut: expectAmountOut,
-      minimumAmountOut: minimumAmountOut,
-    };
-
-    const keys = [
-      { pubkey: sourceTokenKey, isSigner: false, isWritable: true },
-      { pubkey: destinationTokenKey, isSigner: false, isWritable: true },
-      { pubkey: wallet, isSigner: true, isWritable: false },
-      { pubkey: swapInfo, isSigner: false, isWritable: true },
       { pubkey: tokenProgramId, isSigner: false, isWritable: false },
       { pubkey: feeTokenAccount, isSigner: false, isWritable: true },
       ...raydiumInfo.toKeys(),
