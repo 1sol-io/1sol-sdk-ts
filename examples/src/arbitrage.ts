@@ -20,13 +20,14 @@ const arbitrage = async () => {
     const token = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
     const tokenAccount = tokenAccountCache[token];
 
+    const amountIn = 100_000000;
     const minDeltaAmount = 1_00000;
-    const maxDeltaAmount = 12_000000;
+    const maxDeltaAmount = amountIn * 0.6;
     const slippage = 0.002;
 
     while (true) {
         const distributions = await onesol.getRoutes({
-            amount: 100_000000,
+            amount: amountIn,
             sourceMintAddress: token,
             destinationMintAddress: token,
             signal: undefined
