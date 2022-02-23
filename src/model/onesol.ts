@@ -5,10 +5,8 @@ import {
 } from './index';
 import {
   PublicKey,
-  AccountMeta,
   Connection,
 } from '@solana/web3.js'
-import BN from 'bn.js';
 import {
   ONESOL_PROTOCOL_PROGRAM_ID,
 } from '../const'
