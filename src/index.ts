@@ -1,7 +1,7 @@
 export {
   OnesolProtocol,
-  RawRoute,
-  RawDistribution as Route
+  Route,
+  Distribution
 } from './onesolprotocol'
 
 export {
