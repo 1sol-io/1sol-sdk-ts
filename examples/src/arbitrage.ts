@@ -1,8 +1,9 @@
 import { Connection, clusterApiUrl, Signer, TransactionInstruction, PublicKey, Keypair } from '@solana/web3.js'
 import { OnesolProtocol } from "@onesol/onesol-sdk"
-import { composeInstructions, sendSwapTransactions } from './utils/swap';
+import { composeInstructions } from './utils/swap';
 import tokenAccountCache from './tokenAccountCache.json'
 import privatekey from './privatekey.json'
+import { sendTransaction } from './utils/connection';
 
 const connection = new Connection(
     "https://solana-api.projectserum.com",
@@ -92,16 +93,15 @@ const arbitrage = async () => {
 
                 console.log(setupInstructions, swapInstructions, cleanupInstructions);
 
-                await sendSwapTransactions({
-                    connection,
-                    wallet,
-                    setupInstructions,
-                    swapInstructions,
-                    cleanupInstructions,
-                    setupSigners,
-                    swapSigners,
-                    cleanupSigners,
-                })
+                await sendTransaction(connection, wallet, [
+                    ...setupInstructions,
+                    ...swapInstructions,
+                    ...cleanupInstructions,
+                ], [
+                    ...setupSigners,
+                    ...swapSigners,
+                    ...cleanupSigners,
+                ]);
             }
         } else {
             console.log('Unable to find best distribution');

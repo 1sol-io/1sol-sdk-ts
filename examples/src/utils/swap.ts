@@ -16,43 +16,6 @@ import {
 import { WRAPPED_SOL_MINT } from "@onesol/onesol-sdk/lib/const";
 
 
-
-export async function sendSwapTransactions({
-    connection,
-    wallet,
-    setupInstructions,
-    swapInstructions,
-    cleanupInstructions,
-    setupSigners,
-    swapSigners,
-    cleanupSigners,
-}: {
-    connection: Connection,
-    wallet: any,
-    setupInstructions: TransactionInstruction[]
-    swapInstructions: TransactionInstruction[]
-    cleanupInstructions: TransactionInstruction[]
-    setupSigners: Signer[]
-    swapSigners: Signer[]
-    cleanupSigners: Signer[]
-}
-) {
-    if (setupInstructions.length) {
-        console.log('setup tx');
-        await sendTransaction(connection, wallet, setupInstructions, setupSigners);
-    }
-
-    if (swapInstructions.length) {
-        console.log('swap tx');
-        await sendTransaction(connection, wallet, swapInstructions, swapSigners);
-    }
-
-    if (cleanupInstructions.length) {
-        console.log('cleanup tx');
-        await sendTransaction(connection, wallet, cleanupInstructions, cleanupSigners);
-    }
-}
-
 export async function findOrCreateTokenAccount({
     connection,
     owner,
