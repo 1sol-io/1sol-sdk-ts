@@ -38,6 +38,9 @@ export const ORCA_SWAP_NAME = 'Orca'
 export const RAYDIUM_NAME = 'Raydium'
 export const ONEMOON_NAME = '1Moon'
 export const SAROS_SWAP_NAME = 'Saros'
+export const CREMA_FINANCE_NAME = 'Crema'
+export const ALDRIN_FINANCE_NAME = 'Aldrin'
+export const CROPPER_FINANCE_NAME = 'Cropper'
 
 export const EXCHANGER_SPL_TOKEN_SWAP = 'SplTokenSwap'
 export const EXCHANGER_SERUM_DEX = 'SerumDex'
@@ -46,6 +49,9 @@ export const EXCHANGER_ORCA_SWAP = 'OrcaSwap'
 export const EXCHANGER_RAYDIUM = 'Raydium'
 export const EXCHANGER_ONEMOON = 'OneMoon'
 export const EXCHANGER_SAROS_SWAP = 'SarosSwap'
+export const EXCHANGER_CREMA = 'CremaFinance'
+export const EXCHANGER_ALDRIN = 'AldrinExchange'
+export const EXCHANGER_CROPPER = 'CropperFinance'
 
 export const PROVIDER_MAP: { [key: string]: string } = {
   best_route: ONESOL_NAME,
@@ -56,4 +62,7 @@ export const PROVIDER_MAP: { [key: string]: string } = {
   [EXCHANGER_RAYDIUM]: RAYDIUM_NAME,
   [EXCHANGER_ONEMOON]: ONEMOON_NAME,
   [EXCHANGER_SAROS_SWAP]: SAROS_SWAP_NAME,
+  [EXCHANGER_CREMA]: CREMA_FINANCE_NAME,
+  [EXCHANGER_ALDRIN]: ALDRIN_FINANCE_NAME,
+  [EXCHANGER_CROPPER]: CROPPER_FINANCE_NAME,
 }
