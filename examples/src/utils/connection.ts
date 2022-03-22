@@ -4,26 +4,26 @@ import {
     sendAndConfirmTransaction,
     Signer,
     Transaction,
+    Keypair,
+    SignatureResult,
+    SendOptions,
     TransactionInstruction,
 } from "@solana/web3.js";
 
-export const sendTransaction = async (connection: Connection, wallet: Signer, instructions: TransactionInstruction[], signers: Signer[]) => {
-    try {
-        const tx = new Transaction();
-        tx.add(...instructions);
-        tx.recentBlockhash = (
-            await connection.getRecentBlockhash("max")
-        ).blockhash;
-        tx.feePayer = wallet.publicKey
-        if (signers.length)
-            tx.partialSign(...signers);
-        tx.partialSign(wallet)
-        const rawTransaction = tx.serialize();
-        await sendAndConfirmRawTransaction(connection, rawTransaction, {
-            skipPreflight: true,
-            commitment: "confirmed",
-        });
-    } catch (error) {
-        console.log(error);
+export const sendTx = async (connection: Connection, wallet: Keypair, transaction: Transaction, sourceMint, destinationMint, options?: SendOptions, awaitConfirm = true) => {
+    transaction.partialSign(wallet);
+    const rawTransaction = transaction.serialize()
+    const signature = await connection.sendRawTransaction(rawTransaction, options);
+    console.log(`Send Tx ${sourceMint} => ${destinationMint} ${signature} \n`);
+
+    var status: SignatureResult;
+    if (awaitConfirm) {
+        status = (await connection.confirmTransaction(signature, 'confirmed')).value;
     }
+
+    if (status.err) {
+        console.log(status.err)
+    }
+
+    return { signature, error: status.err };
 }

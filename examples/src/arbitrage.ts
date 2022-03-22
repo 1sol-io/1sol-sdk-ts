@@ -1,115 +1,85 @@
 import { Connection, clusterApiUrl, Signer, TransactionInstruction, PublicKey, Keypair } from '@solana/web3.js'
 import { OnesolProtocol } from "@onesol/onesol-sdk"
-import { composeInstructions } from './utils/swap';
-import tokenAccountCache from './tokenAccountCache.json'
 import privatekey from './privatekey.json'
-import { sendTransaction } from './utils/connection';
+import { sendTx } from './utils/connection';
 
 const connection = new Connection(
-    "https://solana-api.projectserum.com",
+    "",
     'confirmed',
 );
 
 const onesol = new OnesolProtocol(connection);
-const secretKey = Uint8Array.from(privatekey);
-const wallet = Keypair.fromSecretKey(secretKey);
+const wallet = Keypair.fromSecretKey(
+    Uint8Array.from(privatekey)
+);
 
 const arbitrage = async () => {
-    await onesol.getTokenList()
 
     /// USDC
-    const token = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
-    const tokenAccount = tokenAccountCache[token];
+    const sourceMint = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v";
+    const destinationMint = sourceMint;
+    const decimals = 1e6;
 
-    const amountIn = 100_000000;
-    const minDeltaAmount = 1_00000;
+    const amountIn = 10 * decimals;
+    const minDeltaAmount = 0.01 * decimals;
     const maxDeltaAmount = amountIn * 0.6;
     const slippage = 0.002;
 
     while (true) {
         const distributions = await onesol.getRoutes({
             amount: amountIn,
-            sourceMintAddress: token,
-            destinationMintAddress: token,
-            signal: undefined
+            sourceMintAddress: sourceMint,
+            destinationMintAddress: destinationMint,
+            experiment: true,
+            size: 1,
         });
         const [bestDistribution, ...others] = distributions;
         if (bestDistribution) {
-            console.log(`${bestDistribution.amount_in} => ${bestDistribution.amount_out}`, bestDistribution);
-            /// keep amount_out - amount_in in [minDeltaAmount, maxDeltaAmount]
+            console.log(`${bestDistribution.amountIn} => ${bestDistribution.amountOut}`);
             if (
-                bestDistribution.amount_out > bestDistribution.amount_in &&
-                bestDistribution.amount_out - bestDistribution.amount_in <= maxDeltaAmount &&
-                bestDistribution.amount_out - bestDistribution.amount_in >= minDeltaAmount
+                bestDistribution.amountOut > bestDistribution.amountIn &&
+                bestDistribution.amountOut - bestDistribution.amountIn <= maxDeltaAmount &&
+                bestDistribution.amountOut - bestDistribution.amountIn >= minDeltaAmount
             ) {
                 /// keep mid token mint in white list.
-                const midTokenMint = bestDistribution.routes[0][0].destination_token_mint.pubkey;
+                const midTokenMint = bestDistribution.routes[0][0].destinationTokenMint.address;
 
-                const midTokenAccount = tokenAccountCache[midTokenMint];
+                console.log('✅ Find arbitrage', `${bestDistribution.amountIn} USDC => ${bestDistribution.amountOut} USDC`);
 
-                console.log('✅ Find arbitrage', `${bestDistribution.amount_in} USDC => ${bestDistribution.amount_out} USDC`);
-
-                const setupInstructions: TransactionInstruction[] = [];
-                const setupSigners: Signer[] = [];
-                const swapInstructions: TransactionInstruction[] = [];
-                const swapSigners: Signer[] = [];
-                const cleanupInstructions: TransactionInstruction[] = [];
-                const cleanupSigners: Signer[] = [];
-
-                await composeInstructions({
-                    onesol,
-                    connection,
-                    route: bestDistribution,
-                    walletAddress: wallet.publicKey,
-                    fromTokenAccount: {
-                        pubkey: new PublicKey(tokenAccount),
-                        mint: new PublicKey(bestDistribution.source_token_mint.pubkey),
-                        owner: undefined,
-                        programId: undefined,
-                        amount: undefined,
-                    },
-                    midTokenAccount: midTokenAccount ? {
-                        pubkey: new PublicKey(midTokenAccount),
-                        mint: new PublicKey(midTokenMint),
-                        owner: undefined,
-                        programId: undefined,
-                        amount: undefined,
-                    } : undefined,
-                    toTokenAccount: {
-                        pubkey: new PublicKey(tokenAccount),
-                        mint: new PublicKey(bestDistribution.destination_token_mint.pubkey),
-                        owner: undefined,
-                        programId: undefined,
-                        amount: undefined,
-                    },
-                    setupInstructions,
-                    setupSigners,
-                    swapInstructions,
-                    swapSigners,
-                    cleanupInstructions,
-                    cleanupSigners,
-                    slippage
+                const transactions = await onesol.getTransactions({
+                    wallet: wallet.publicKey,
+                    distribution: bestDistribution,
+                    slippage,
                 })
 
-                console.log(setupInstructions, swapInstructions, cleanupInstructions);
-
-                await sendTransaction(connection, wallet, [
-                    ...setupInstructions,
-                    ...swapInstructions,
-                    ...cleanupInstructions,
-                ], [
-                    ...setupSigners,
-                    ...swapSigners,
-                    ...cleanupSigners,
-                ]);
+                try {
+                    if (transactions.length == 1) {
+                        const { signature, error } = await sendTx(connection, wallet, transactions[0], sourceMint, destinationMint);
+                    } else if (transactions.length == 3) {
+                        for (let index = 0; index < transactions.length; index++) {
+                            try {
+                                const { signature, error } = await sendTx(connection, wallet, transactions[index], sourceMint, destinationMint, { skipPreflight: true }, index == 0 || index == 2);
+                            } catch (error) {
+                                if (transactions.length == 3 && index == 1) {
+                                    const { signature, error } = await sendTx(connection, wallet, transactions[2], sourceMint, destinationMint, { skipPreflight: true }, true)
+                                }
+                            }
+                        }
+                    } else {
+                        console.log('abort')
+                        break;
+                    }
+                } catch (error) {
+                    console.log(error)
+                }
             }
         } else {
             console.log('Unable to find best distribution');
         }
 
 
-        console.log('Waiting for next epoch after 20s.');
-        await (new Promise((resolve) => setTimeout(resolve, 20 * 1000)));
+        console.log('Waiting for next epoch after 5s.');
+        await (new Promise((resolve) => setTimeout(resolve, 5 * 1000)));
     }
 }
 
