@@ -146,7 +146,8 @@ export class OnesolProtocol {
     sourceTokenAccount = null,
     destinationTokenAccount = null,
     bridgeTokenAccount = null,
-    openOrders = {}
+    openOrders = {},
+    legacy = false,
   }: {
     wallet: PublicKey,
     distribution: Distribution,
@@ -155,7 +156,8 @@ export class OnesolProtocol {
     sourceTokenAccount?: PublicKey | null,
     destinationTokenAccount?: PublicKey | null,
     bridgeTokenAccount?: PublicKey | null,
-    openOrders?: object
+    openOrders?: object,
+    legacy?: boolean,
   }): Promise<Transaction[]> {
     const { amountOut } = distribution
     const minimumAmountOut = Math.ceil(amountOut * (1 - slippage))
@@ -172,7 +174,7 @@ export class OnesolProtocol {
     }
 
     const { data: { transactions } } = await axios({
-      url: new URL(`/2/${CHAIN_ID}/transactions`, this.apiBase).href,
+      url: new URL(`/2/${CHAIN_ID}/transactions${legacy ? '' : '2'}`, this.apiBase).href,
       method: 'POST',
       data,
     })
