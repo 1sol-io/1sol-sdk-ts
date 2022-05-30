@@ -24,10 +24,11 @@ export * from './model'
 
 export interface ConfigProps {
   apiBase: string,
+  headers?: object,
 }
 
 export const defaultConfig = {
-  apiBase: "https://api.1sol.io"
+  apiBase: "https://api.1sol.io",
 }
 
 export interface Route {
@@ -75,9 +76,9 @@ export class OnesolProtocol {
     private config: ConfigProps = defaultConfig
   ) {
     this.connection = connection;
-    this.config = config
+    this.config = { ...defaultConfig, ...config }
     this._swapInfoCache = {};
-    this.apiBase = config.apiBase;
+    this.apiBase = this.config.apiBase;
   }
 
   public async getTokenList(): Promise<TokenInfo[]> {
@@ -121,6 +122,14 @@ export class OnesolProtocol {
       experiment
     }
 
+    let headers = {
+      'Content-Type': 'application/json',
+    }
+
+    if (this.config.headers) {
+      headers = { ...headers, ...this.config.headers }
+    }
+
     const { data: { distributions } }: {
       data: {
         distributions: Distribution[]
@@ -128,9 +137,7 @@ export class OnesolProtocol {
     } = await axios({
       url: new URL(`/2/${CHAIN_ID}/routes`, this.apiBase).href,
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers,
       data,
       signal
     })
@@ -173,9 +180,18 @@ export class OnesolProtocol {
       openOrders
     }
 
+    let headers = {
+      'Content-Type': 'application/json',
+    }
+
+    if (this.config.headers) {
+      headers = { ...headers, ...this.config.headers }
+    }
+
     const { data: { transactions } } = await axios({
       url: new URL(`/2/${CHAIN_ID}/transactions${legacy ? '' : '2'}`, this.apiBase).href,
       method: 'POST',
+      headers,
       data,
     })
 
