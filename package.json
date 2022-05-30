@@ -1,6 +1,6 @@
 {
   "name": "@onesol/onesol-sdk",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "1sol protocol sdk",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
