@@ -11,6 +11,9 @@ export const RAYDIUN_V4_PROGRAM_ID = new PublicKey('675kPX9MHTjS2zt1qfr1NYHuzeLX
 export const ONE_MOON_SWAP_PROGRAM_ID = new PublicKey('1MooN32fuBBgApc8ujknKJw5sef3BVwPGgz3pto1BAh');
 export const TOKEN_SWAP_PROGRAM_ID = new PublicKey('SwaPpA9LAaLfeLi3a68M4DjnLqgtticKg6CnyNwgAC8');
 export const SAROS_SWAP_PROGRAM_ID = new PublicKey('SSwapUtytfBdBn1b9NUGG6foMVPtcWgpRU32HToDUZr');
+export const CREMA_FINANCE_PROGRAM_ID = new PublicKey('6MLxLqiXaaSUpkgMnWDTuejNZEz3kE7k2woyHGVFw319')
+export const ALDRIN_EXCHANGE_PROGRAM_ID = new PublicKey('CURVGoZn8zycx6FXwwevgBTB2gVvdbGTEpvMJDbgs2t4')
+export const CROPPER_FINANCE_PROGRAM_ID = new PublicKey('CTMAxxk34HjKWxQ3QLZK1HpaLXmBveao3ESePXbiyfzh')
 
 // export const CHAIN_ID = 103;
 // export const ONESOL_PROTOCOL_PROGRAM_ID = new PublicKey('9Bj8zgNWT6UaNcXMgzMFrnH5Z13nQ6vFkRNxP743zZyr');
